@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27428.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Divergic.Configuration.Autofac", "Divergic.Configuration.Autofac\Divergic.Configuration.Autofac.csproj", "{C2D23F7A-5038-4F50-80ED-BA969B35C6C7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Divergic.Configuration.Autofac.UnitTests", "Divergic.Configuration.Autofac.UnitTests\Divergic.Configuration.Autofac.UnitTests.csproj", "{32C6C643-519F-4121-8B03-D3DA1A77298C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C2D23F7A-5038-4F50-80ED-BA969B35C6C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2D23F7A-5038-4F50-80ED-BA969B35C6C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2D23F7A-5038-4F50-80ED-BA969B35C6C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2D23F7A-5038-4F50-80ED-BA969B35C6C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32C6C643-519F-4121-8B03-D3DA1A77298C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32C6C643-519F-4121-8B03-D3DA1A77298C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32C6C643-519F-4121-8B03-D3DA1A77298C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32C6C643-519F-4121-8B03-D3DA1A77298C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9ED6DDD3-1B88-4DB0-B9F2-140D0B14C9BE}
+	EndGlobalSection
+EndGlobal
