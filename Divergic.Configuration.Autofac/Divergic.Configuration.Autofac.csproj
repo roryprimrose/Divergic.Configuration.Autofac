@@ -1,7 +1,21 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\Divergic.Configuration.Autofac.xml</DocumentationFile>
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <NeutralLanguage>en-US</NeutralLanguage>
+
+    <Title>Autofac registration for configuration</Title>
+    <Authors>Rory Primrose</Authors>
+    <Company>Divergic Ptd Ltd</Company>
+    <Description>This library contains an Autofac module to register configuration types.</Description>
+    <Copyright>Copyright © Divergic Ptd Ltd 2018</Copyright>
+    <PackageLicenseUrl>https://github.com/Divergic/Divergic.Configuration.Autofac/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/Divergic/Divergic.Configuration.Autofac</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Divergic/Divergic.Configuration.Autofac</RepositoryUrl>
+    <PackageTags>Autofac;Configuration</PackageTags>
+    <IncludeSymbols>true</IncludeSymbols>
   </PropertyGroup>
 
   <ItemGroup>
