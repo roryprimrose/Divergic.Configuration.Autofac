@@ -1,7 +1,6 @@
 ﻿namespace Divergic.Configuration.Autofac
 {
     using global::Autofac;
-    using Module = global::Autofac.Module;
 
     /// <summary>
     /// The <see cref="ConfigurationModule{T}"/>

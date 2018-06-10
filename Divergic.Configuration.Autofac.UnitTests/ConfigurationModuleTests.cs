@@ -12,7 +12,7 @@ namespace Divergic.Configuration.Autofac.UnitTests
         {
             var builder = new ContainerBuilder();
 
-            builder.RegisterModule<ConfigurationModule<AppSettingsConfigurationResolver<Config>>>();
+            builder.RegisterModule<ConfigurationModule<JsonConfigurationResolver<Config>>>();
 
             var container = builder.Build();
 
