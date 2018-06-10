@@ -2,6 +2,11 @@
 {
     using System;
 
+    public class NoDefinition
+    {
+        public string Value { get; set; }
+    }
+
     public interface IConfig
     {
         FirstJob FirstJob { get; }

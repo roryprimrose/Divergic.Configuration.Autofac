@@ -1,5 +1,6 @@
 ﻿namespace Divergic.Configuration.Autofac
 {
+    using System.Linq;
     using global::Autofac;
 
     /// <summary>
@@ -14,20 +15,38 @@
         protected override void Load(ContainerBuilder builder)
         {
             var resolver = new T();
-            var config = resolver.Resolve();
 
-            RegisterConfigTypes(builder, config);
+            var configuration = resolver.Resolve();
 
-            builder.RegisterInstance(config).AsImplementedInterfaces();
-        }
-
-        private static void RegisterConfigTypes(ContainerBuilder builder, object configuration)
-        {
             if (configuration == null)
             {
                 return;
             }
 
+            var configType = configuration.GetType();
+
+            if (configType.IsValueType)
+            {
+                return;
+            }
+
+            if (configType == typeof(string))
+            {
+                return;
+            }
+
+            RegisterConfigTypes(builder, configuration);
+
+            if (configuration.GetType().GetInterfaces().Any())
+            {
+                builder.RegisterInstance(configuration).AsImplementedInterfaces();
+            }
+
+            builder.RegisterInstance(configuration).AsSelf();
+        }
+
+        private static void RegisterConfigTypes(ContainerBuilder builder, object configuration)
+        {
             // Register all the properties of the configuration as their interfaces This must be done
             // after registering assembly types and modules because type scanning may have already
             // registered the configuration classes as their interfaces which means Autofac will
@@ -56,7 +75,12 @@
                     continue;
                 }
 
-                builder.RegisterInstance(value).AsImplementedInterfaces();
+                if (value.GetType().GetInterfaces().Any())
+                {
+                    builder.RegisterInstance(value).AsImplementedInterfaces();
+                }
+
+                builder.RegisterInstance(value).AsSelf();
 
                 // Recurse into the child properties
                 RegisterConfigTypes(builder, value);

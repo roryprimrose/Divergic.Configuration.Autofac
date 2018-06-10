@@ -19,13 +19,10 @@
             var configurationRoot = builder
                 .Build();
 
-            var config = configurationRoot.Get(ConfigType);
+            var config = configurationRoot.Get(typeof(T));
 
             return config;
         }
-
-        /// <inheritdoc />
-        public Type ConfigType => typeof(T);
 
         /// <summary>
         /// Gets the filename to load configuration values from.
