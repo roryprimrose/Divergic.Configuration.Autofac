@@ -5,7 +5,15 @@ VisualStudioVersion = 15.0.27428.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Divergic.Configuration.Autofac", "Divergic.Configuration.Autofac\Divergic.Configuration.Autofac.csproj", "{C2D23F7A-5038-4F50-80ED-BA969B35C6C7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Divergic.Configuration.Autofac.UnitTests", "Divergic.Configuration.Autofac.UnitTests\Divergic.Configuration.Autofac.UnitTests.csproj", "{32C6C643-519F-4121-8B03-D3DA1A77298C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Divergic.Configuration.Autofac.UnitTests", "Divergic.Configuration.Autofac.UnitTests\Divergic.Configuration.Autofac.UnitTests.csproj", "{32C6C643-519F-4121-8B03-D3DA1A77298C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B4658C06-97EA-4085-AFF8-39C676EDC9BA}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		GitVersion.yml = GitVersion.yml
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

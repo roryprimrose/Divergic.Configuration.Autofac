@@ -1,4 +1,4 @@
-namespace Divergic.Configuration.Autofac.UnitTests
+﻿namespace Divergic.Configuration.Autofac.UnitTests
 {
     using System;
     using FluentAssertions;
@@ -14,8 +14,10 @@ namespace Divergic.Configuration.Autofac.UnitTests
         public void DoesNotRegisterNullNestedPropertyValueTypesTest()
         {
             var builder = new ContainerBuilder();
+            var resolver = new NullPropertyResolverConfig();
+            var sut = new ConfigurationModule(resolver);
 
-            builder.RegisterModule<ConfigurationModule<NullPropertyResolverConfig>>();
+            builder.RegisterModule(sut);
 
             var container = builder.Build();
 
@@ -32,8 +34,10 @@ namespace Divergic.Configuration.Autofac.UnitTests
         public void DoesNotRegisterStringTypeConfigTest()
         {
             var builder = new ContainerBuilder();
+            var resolver = new InMemoryResolver<string>();
+            var sut = new ConfigurationModule(resolver);
 
-            builder.RegisterModule<ConfigurationModule<InMemoryResolver<string>>>();
+            builder.RegisterModule(sut);
 
             var container = builder.Build();
 
@@ -45,8 +49,10 @@ namespace Divergic.Configuration.Autofac.UnitTests
         public void DoesNotRegisterValueTypeConfigTest()
         {
             var builder = new ContainerBuilder();
+            var resolver = new InMemoryResolver<int>();
+            var sut = new ConfigurationModule(resolver);
 
-            builder.RegisterModule<ConfigurationModule<InMemoryResolver<int>>>();
+            builder.RegisterModule(sut);
 
             var container = builder.Build();
 
@@ -58,8 +64,10 @@ namespace Divergic.Configuration.Autofac.UnitTests
         public void RegistersConfigurationWithNestedTypesTest()
         {
             var builder = new ContainerBuilder();
+            var resolver = new InMemoryResolver<Config>();
+            var sut = new ConfigurationModule(resolver);
 
-            builder.RegisterModule<ConfigurationModule<InMemoryResolver<Config>>>();
+            builder.RegisterModule(sut);
 
             var container = builder.Build();
 
@@ -93,8 +101,10 @@ namespace Divergic.Configuration.Autofac.UnitTests
         public void RegistersConfigurationWithoutNestedTypesTest()
         {
             var builder = new ContainerBuilder();
+            var resolver = new InMemoryResolver<FirstJob>();
+            var sut = new ConfigurationModule(resolver);
 
-            builder.RegisterModule<ConfigurationModule<InMemoryResolver<FirstJob>>>();
+            builder.RegisterModule(sut);
 
             var container = builder.Build();
 
@@ -107,8 +117,10 @@ namespace Divergic.Configuration.Autofac.UnitTests
         public void RegistersInstanceWithoutInterfaceTest()
         {
             var builder = new ContainerBuilder();
+            var resolver = new InMemoryResolver<NoDefinition>();
+            var sut = new ConfigurationModule(resolver);
 
-            builder.RegisterModule<ConfigurationModule<InMemoryResolver<NoDefinition>>>();
+            builder.RegisterModule(sut);
 
             var container = builder.Build();
 
@@ -120,12 +132,22 @@ namespace Divergic.Configuration.Autofac.UnitTests
         public void SkipsRegistrationWhenNullConfigurationFoundTypesTest()
         {
             var builder = new ContainerBuilder();
+            var resolver = new NullResolver<Config>();
+            var sut = new ConfigurationModule(resolver);
 
-            builder.RegisterModule<ConfigurationModule<NullResolver<Config>>>();
+            builder.RegisterModule(sut);
 
             var container = builder.Build();
 
             container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount);
+        }
+
+        [Fact]
+        public void ThrowsExceptionWhenCreatedWithNullResolverTest()
+        {
+            Action action = () => new ConfigurationModule(null);
+
+            action.Should().Throw<ArgumentNullException>();
         }
 
         private class InMemoryResolver<T> : IConfigurationResolver

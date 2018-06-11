@@ -1,22 +1,30 @@
 ﻿namespace Divergic.Configuration.Autofac
 {
+    using System;
     using System.Linq;
     using global::Autofac;
 
     /// <summary>
-    /// The <see cref="ConfigurationModule{T}"/>
-    /// class provides Autofac registration support for nested configuration types.
+    /// The <see cref="ConfigurationModule"/>
+    /// class is used to register nested configuration types.
     /// </summary>
-    /// <typeparam name="T">The type of resolver that provides the root configuration.</typeparam>
-    public class ConfigurationModule<T> : Module
-        where T : IConfigurationResolver, new()
+    public class ConfigurationModule : Module
     {
+        private readonly IConfigurationResolver _resolver;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConfigurationModule"/>.
+        /// </summary>
+        /// <param name="resolver">The configuration resolver.</param>
+        public ConfigurationModule(IConfigurationResolver resolver)
+        {
+            _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
+        }
+
         /// <inheritdoc />
         protected override void Load(ContainerBuilder builder)
         {
-            var resolver = new T();
-
-            var configuration = resolver.Resolve();
+            var configuration = _resolver.Resolve();
 
             if (configuration == null)
             {
