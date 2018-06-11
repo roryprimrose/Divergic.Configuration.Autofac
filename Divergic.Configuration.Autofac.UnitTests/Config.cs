@@ -26,8 +26,6 @@
         string Name { get; }
 
         TimeSpan Trigger { get; }
-
-        int TriggerInSeconds { get; }
     }
 
     public class FirstJob : IFirstJob
