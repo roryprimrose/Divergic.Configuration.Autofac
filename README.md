@@ -1,10 +1,14 @@
 # Introduction
 
-The Divergic.Configuration.Autofac package provides an Autofac module for registering nested configuration types. This is helpful when wanting dependency injection of configuration types loaded from JSON configuration in ASP.Net core.
+The Divergic.Configuration.Autofac NuGet package provides an Autofac module for registering nested configuration types. This is helpful when wanting dependency injection of configuration types loaded from JSON configuration in ASP.Net core.
+
+# Installation
+
+The package can be installed from NuGet using ```Install-Package Divergic.Configuration.Autofac```.
 
 # Configuration Resolution
 
-The module relies on an ```IConfigurationResolver``` to load the root configuration class. It will then recursively register all properties found on the resolved configuration and register them using ```AsSelf``` as well as ```AsImplementedInterfaces``` where implemented interfaces are found. 
+The module relies on an ```IConfigurationResolver``` to load the root configuration class. It will then recursively register all properties found on the root configuration and register them using ```AsSelf``` as well as ```AsImplementedInterfaces``` where implemented interfaces are found. 
 
 # Json Resolution
 
@@ -18,7 +22,7 @@ builder.RegisterModule<ConfigurationModule<JsonResolver<Config>>>();
 var container = builder.Build();
 ```
 
-Perhaps the default appsettings.json filename does not work in a particular scenario. The ```JsonResolver``` class can accept a different filename.
+The ```JsonResolver``` class can accept a different filename if the default appsettings.json is not suitable.
 
 ```csharp
 var builder = new ContainerBuilder();
@@ -46,7 +50,7 @@ var container = builder.Build();
 
 # Custom Resolution
 
-Need to resolve configuration from something other an a JSON file? The ```ConfigurationModule``` will accept any ```IConfigurationResolver```. You can write any custom resolver and provide it to the module.
+Need to resolve a root configuration object from something other than a JSON file? The ```ConfigurationModule``` will accept any ```IConfigurationResolver```. You can write any custom resolver and provide it to the module.
 
 # Example
 
