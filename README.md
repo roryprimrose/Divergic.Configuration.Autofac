@@ -8,7 +8,7 @@ The package can be installed from NuGet using ```Install-Package Divergic.Config
 
 # Configuration Resolution
 
-The module relies on an ```IConfigurationResolver``` to load the root configuration class. It will then recursively register all properties found on the root configuration and register them using ```AsSelf``` as well as ```AsImplementedInterfaces``` where implemented interfaces are found. 
+The module relies on an ```IConfigurationResolver``` to load the root configuration class. It will then recursively register all properties found on the root configuration using ```AsSelf``` as well as ```AsImplementedInterfaces``` where implemented interfaces are found. 
 
 # Json Resolution
 
