@@ -1,0 +1,5 @@
+﻿{
+  "Storage": {
+    "BlobStorage": "local blob storage connection"
+  }
+}
