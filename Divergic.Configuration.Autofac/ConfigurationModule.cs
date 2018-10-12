@@ -1,6 +1,7 @@
 ﻿namespace Divergic.Configuration.Autofac
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using global::Autofac;
 
@@ -43,18 +44,50 @@
                 return;
             }
 
-            RegisterConfigTypes(builder, configuration);
+            var referenceTracker = new List<object>();
 
-            if (configuration.GetType().GetInterfaces().Any())
+            RegisterConfigTypes(builder, configuration, referenceTracker);
+        }
+
+        private static void RegisterConfigTypes(
+            ContainerBuilder builder,
+            object configuration,
+            List<object> referenceTracker)
+        {
+            if (configuration == null)
+            {
+                return;
+            }
+
+            if (referenceTracker.Any(x => object.ReferenceEquals(configuration, x)))
+            {
+                // We found a circular reference
+                return;
+            }
+
+            var configType = configuration.GetType();
+
+            if (configType.IsValueType)
+            {
+                // Skip value types
+                return;
+            }
+
+            if (configType == typeof(string))
+            {
+                // Skip strings
+                return;
+            }
+
+            if (configType.GetInterfaces().Any())
             {
                 builder.RegisterInstance(configuration).AsImplementedInterfaces();
             }
-
+            
             builder.RegisterInstance(configuration).AsSelf();
-        }
 
-        private static void RegisterConfigTypes(ContainerBuilder builder, object configuration)
-        {
+            referenceTracker.Add(configuration);
+
             // Register all the properties of the configuration as their interfaces This must be done
             // after registering assembly types and modules because type scanning may have already
             // registered the configuration classes as their interfaces which means Autofac will
@@ -63,35 +96,10 @@
 
             foreach (var property in properties)
             {
-                if (property.PropertyType.IsValueType)
-                {
-                    // Skip value types
-                    continue;
-                }
-
-                if (property.PropertyType == typeof(string))
-                {
-                    // Skip strings
-                    continue;
-                }
-
                 var value = property.GetValue(configuration);
-
-                if (value == null)
-                {
-                    // There is no value on the property, skip to the next one
-                    continue;
-                }
-
-                if (value.GetType().GetInterfaces().Any())
-                {
-                    builder.RegisterInstance(value).AsImplementedInterfaces();
-                }
-
-                builder.RegisterInstance(value).AsSelf();
-
+                
                 // Recurse into the child properties
-                RegisterConfigTypes(builder, value);
+                RegisterConfigTypes(builder, value, referenceTracker);
             }
         }
     }

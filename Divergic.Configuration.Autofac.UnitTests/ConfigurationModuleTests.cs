@@ -11,6 +11,44 @@
         private const int DefaultRegistrationCount = 1;
 
         [Fact]
+        public void CanRegisterTypeWithCircularReferenceTest()
+        {
+            var value = new Parent {Child = new Child()};
+
+            value.Child.Parent = value;
+
+            var builder = new ContainerBuilder();
+            var resolver = new InstanceResolver(value);
+            var sut = new ConfigurationModule(resolver);
+
+            builder.RegisterModule(sut);
+
+            var container = builder.Build();
+
+            // There are several registrations which aren't expected because of Uri properties being resolved
+            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 2);
+            container.Should().HaveRegistered<Parent>();
+            container.Should().HaveRegistered<Child>();
+        }
+
+        [Fact]
+        public void CanRegisterTypeWithUriPropertyTest()
+        {
+            var builder = new ContainerBuilder();
+            var resolver = new InMemoryResolver<Location>();
+            var sut = new ConfigurationModule(resolver);
+
+            builder.RegisterModule(sut);
+
+            var container = builder.Build();
+
+            // There are several registrations which aren't expected because of Uri properties being resolved
+            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 5);
+            container.Should().HaveRegistered<Location>();
+            container.Should().HaveRegistered<Uri>();
+        }
+
+        [Fact]
         public void DoesNotRegisterNullNestedPropertyValueTypesTest()
         {
             var builder = new ContainerBuilder();
@@ -150,6 +188,21 @@
             action.Should().Throw<ArgumentNullException>();
         }
 
+        public class Child
+        {
+            public Parent Parent { get; set; }
+        }
+
+        public class Location
+        {
+            public Uri Address { get; set; }
+        }
+
+        public class Parent
+        {
+            public Child Child { get; set; }
+        }
+
         private class InMemoryResolver<T> : IConfigurationResolver
         {
             public object Resolve()
@@ -158,6 +211,23 @@
             }
 
             public Type ConfigType => typeof(T);
+        }
+
+        private class InstanceResolver : IConfigurationResolver
+        {
+            private readonly object _value;
+
+            public InstanceResolver(object value)
+            {
+                _value = value;
+            }
+
+            public object Resolve()
+            {
+                return _value;
+            }
+
+            public Type ConfigType => _value.GetType();
         }
 
         private class NullPropertyResolverConfig : IConfigurationResolver
