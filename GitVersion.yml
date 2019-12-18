@@ -2,5 +2,5 @@ mode: ContinuousDeployment
 branches:
   master:
     tag: beta
-  hotfix(es)?[/-]:
+  hotfix:
     tag: useBranchName

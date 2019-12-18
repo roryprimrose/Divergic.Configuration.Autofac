@@ -1,3 +1,8 @@
+
+[![Coverage Status](https://coveralls.io/repos/github/divergic/Divergic.Configuration.Autofac/badge.svg?branch=master)](https://coveralls.io/github/divergic/Divergic.Configuration.Autofac?branch=master)
+
+[![Actions Status](https://github.com/divergic/Divergic.Configuration.Autofac/workflows/CI/badge.svg)](https://github.com/divergic/Divergic.Configuration.Autofac/actions)
+
 # Introduction
 
 The Divergic.Configuration.Autofac NuGet package provides an Autofac module for registering nested configuration types. This is helpful when wanting dependency injection of configuration types loaded from JSON configuration in ASP.Net core.
