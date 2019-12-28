@@ -1,6 +1,7 @@
 ﻿namespace Divergic.Configuration.Autofac.UnitTests
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
     using FluentAssertions;
     using Xunit;
 
@@ -36,6 +37,7 @@
         [InlineData(null)]
         [InlineData("")]
         [InlineData("  ")]
+        [SuppressMessage("Usage", "CA1806:Do not ignore method results", Justification = "The constructor is what is being tested")]
         public void ThrowsExceptionWhenCreatedWithInvalidFilenameTest(string filename)
         {
             Action action = () => new JsonResolver<Config>(filename);

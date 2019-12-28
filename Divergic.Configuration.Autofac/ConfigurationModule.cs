@@ -52,14 +52,14 @@
         private static void RegisterConfigTypes(
             ContainerBuilder builder,
             object configuration,
-            List<object> referenceTracker)
+            ICollection<object> referenceTracker)
         {
             if (configuration == null)
             {
                 return;
             }
 
-            if (referenceTracker.Any(x => object.ReferenceEquals(configuration, x)))
+            if (referenceTracker.Any(x => ReferenceEquals(configuration, x)))
             {
                 // We found a circular reference
                 return;
