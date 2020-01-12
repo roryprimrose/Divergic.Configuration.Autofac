@@ -461,4 +461,6 @@
 	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=755B781E52291F4BAE00C30D20630B1C/ReplaceComment/@EntryValue">Update usage</s:String>
 	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=755B781E52291F4BAE00C30D20630B1C/ReplacePattern/@EntryValue">Ensure.Guid.IsNotEmpty($Item$, nameof($Item$));</s:String>
 	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=755B781E52291F4BAE00C30D20630B1C/SearchPattern/@EntryValue">Ensure.That($Item$, nameof($Item$)).IsNotEmpty();</s:String>
-	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=755B781E52291F4BAE00C30D20630B1C/Severity/@EntryValue">HINT</s:String></wpf:ResourceDictionary>
+	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=755B781E52291F4BAE00C30D20630B1C/Severity/@EntryValue">HINT</s:String>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=Autofac/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=Divergic/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>

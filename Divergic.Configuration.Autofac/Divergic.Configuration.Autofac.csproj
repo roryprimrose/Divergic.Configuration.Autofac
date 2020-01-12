@@ -12,7 +12,7 @@
     <Company>Divergic Ptd Ltd</Company>
     <Description>This library contains an Autofac module to register configuration types.</Description>
     <Copyright>Copyright © Divergic Ptd Ltd 2018</Copyright>
-    <PackageLicenseUrl>https://github.com/Divergic/Divergic.Configuration.Autofac/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/Divergic/Divergic.Configuration.Autofac</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Divergic/Divergic.Configuration.Autofac</RepositoryUrl>
     <PackageTags>Autofac;Configuration</PackageTags>

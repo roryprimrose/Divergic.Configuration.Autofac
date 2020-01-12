@@ -1,5 +1,5 @@
 
-[![Coverage Status](https://coveralls.io/repos/github/divergic/Divergic.Configuration.Autofac/badge.svg?branch=master)](https://coveralls.io/github/divergic/Divergic.Configuration.Autofac?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/Divergic/Divergic.Configuration.Autofac/badge.svg?branch=master)](https://coveralls.io/github/Divergic/Divergic.Configuration.Autofac?branch=master)
 
 [![Actions Status](https://github.com/divergic/Divergic.Configuration.Autofac/workflows/CI/badge.svg)](https://github.com/divergic/Divergic.Configuration.Autofac/actions)
 

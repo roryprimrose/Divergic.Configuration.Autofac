@@ -1,6 +1,7 @@
 ﻿namespace Divergic.Configuration.Autofac.UnitTests
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
     using FluentAssertions;
     using global::Autofac;
     using ModelBuilder;
@@ -181,6 +182,7 @@
         }
 
         [Fact]
+        [SuppressMessage("Usage", "CA1806:Do not ignore method results", Justification = "The constructor is what is being tested")]
         public void ThrowsExceptionWhenCreatedWithNullResolverTest()
         {
             Action action = () => new ConfigurationModule(null);
@@ -188,17 +190,18 @@
             action.Should().Throw<ArgumentNullException>();
         }
 
-        public class Child
+        private class Child
         {
             public Parent Parent { get; set; }
         }
 
-        public class Location
+        [SuppressMessage("Usage", "CA1812:Class not instantiated", Justification = "The is used by Autofac registrations")]
+        private class Location
         {
             public Uri Address { get; set; }
         }
 
-        public class Parent
+        private class Parent
         {
             public Child Child { get; set; }
         }
@@ -210,7 +213,7 @@
                 return Model.Create(ConfigType);
             }
 
-            public Type ConfigType => typeof(T);
+            private static Type ConfigType => typeof(T);
         }
 
         private class InstanceResolver : IConfigurationResolver
@@ -238,8 +241,6 @@
 
                 return model;
             }
-
-            public Type ConfigType => typeof(Config);
         }
 
         private class NullResolver<T> : IConfigurationResolver
@@ -248,8 +249,6 @@
             {
                 return null;
             }
-
-            public Type ConfigType => typeof(T);
         }
     }
 }
