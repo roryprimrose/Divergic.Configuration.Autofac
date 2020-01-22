@@ -96,6 +96,15 @@
 
             foreach (var property in properties)
             {
+                var parameters = property.GetIndexParameters();
+
+                if (parameters.Length > 0)
+                {
+                    // This is an indexer property which we don't support
+                    // Skip over it and continue to find property values that we can try to register
+                    continue;
+                }
+
                 var value = property.GetValue(configuration);
                 
                 // Recurse into the child properties
