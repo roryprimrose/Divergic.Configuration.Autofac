@@ -52,7 +52,7 @@ namespace Divergic.Configuration.Autofac.UnitTests
                 return Model.Create(ConfigType);
             }
 
-            public Type ConfigType => typeof(T);
+            private static Type ConfigType => typeof(T);
         }
     }
 }

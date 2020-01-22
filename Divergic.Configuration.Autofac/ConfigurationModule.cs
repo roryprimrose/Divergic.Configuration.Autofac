@@ -59,7 +59,7 @@
                 return;
             }
 
-            if (referenceTracker.Any(x => object.ReferenceEquals(configuration, x)))
+            if (referenceTracker.Any(x => ReferenceEquals(configuration, x)))
             {
                 // We found a circular reference
                 return;

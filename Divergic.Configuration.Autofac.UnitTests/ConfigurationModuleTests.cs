@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.Diagnostics.CodeAnalysis;
     using FluentAssertions;
     using global::Autofac;
     using ModelBuilder;
@@ -207,6 +208,7 @@
         }
 
         [Fact]
+        [SuppressMessage("Usage", "CA1806:Do not ignore method results", Justification = "The constructor is what is being tested")]
         public void ThrowsExceptionWhenCreatedWithNullResolverTest()
         {
             Action action = () => new ConfigurationModule(null);
@@ -214,7 +216,7 @@
             action.Should().Throw<ArgumentNullException>();
         }
 
-        public class Child
+        private class Child
         {
             public Parent Parent
             {
@@ -223,7 +225,8 @@
             }
         }
 
-        public class DataSet
+        [SuppressMessage("Usage", "CA1812:Class not instantiated", Justification = "The is used by Autofac registrations")]
+        private class DataSet
         {
             public Collection<Location> Locations
             {
@@ -232,7 +235,8 @@
             }
         }
 
-        public class Location
+        [SuppressMessage("Usage", "CA1812:Class not instantiated", Justification = "The is used by Autofac registrations")]
+        private class Location
         {
             public Uri Address
             {
@@ -241,7 +245,7 @@
             }
         }
 
-        public class Parent
+        private class Parent
         {
             public Child Child
             {
@@ -257,7 +261,7 @@
                 return Model.Create(ConfigType);
             }
 
-            public Type ConfigType => typeof(T);
+            private static Type ConfigType => typeof(T);
         }
 
         private class InstanceResolver : IConfigurationResolver
@@ -285,8 +289,6 @@
 
                 return model;
             }
-
-            public Type ConfigType => typeof(Config);
         }
 
         private class NullResolver<T> : IConfigurationResolver
@@ -295,8 +297,6 @@
             {
                 return null;
             }
-
-            public Type ConfigType => typeof(T);
         }
     }
 }
