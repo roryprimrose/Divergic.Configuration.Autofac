@@ -1,6 +1,8 @@
 ﻿namespace Divergic.Configuration.Autofac.UnitTests
 {
     using System;
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using FluentAssertions;
     using global::Autofac;
     using ModelBuilder;
@@ -13,7 +15,10 @@
         [Fact]
         public void CanRegisterTypeWithCircularReferenceTest()
         {
-            var value = new Parent {Child = new Child()};
+            var value = new Parent
+            {
+                Child = new Child()
+            };
 
             value.Child.Parent = value;
 
@@ -96,6 +101,27 @@
 
             container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount);
             container.Should().NotHaveRegistered<int>();
+        }
+
+        [Fact]
+        public void RegistersConfigurationWithClassHavingIndexerPropertyTest()
+        {
+            var builder = new ContainerBuilder();
+            var resolver = new InMemoryResolver<DataSet>();
+            var sut = new ConfigurationModule(resolver);
+
+            builder.RegisterModule(sut);
+
+            var container = builder.Build();
+
+            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 3);
+
+            container.Should().HaveRegistered<ICollection<Location>>();
+            container.Should().HaveRegistered<Collection<Location>>();
+
+            var config = container.Resolve<ICollection<Location>>();
+
+            container.Resolve<Collection<Location>>().Should().BeSameAs(config);
         }
 
         [Fact]
@@ -190,17 +216,38 @@
 
         public class Child
         {
-            public Parent Parent { get; set; }
+            public Parent Parent
+            {
+                get;
+                set;
+            }
+        }
+
+        public class DataSet
+        {
+            public Collection<Location> Locations
+            {
+                get;
+                set;
+            }
         }
 
         public class Location
         {
-            public Uri Address { get; set; }
+            public Uri Address
+            {
+                get;
+                set;
+            }
         }
 
         public class Parent
         {
-            public Child Child { get; set; }
+            public Child Child
+            {
+                get;
+                set;
+            }
         }
 
         private class InMemoryResolver<T> : IConfigurationResolver
