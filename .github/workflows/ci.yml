@@ -52,6 +52,11 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '3.1.x' # SDK Version to use.
+        
+    - name: Setup dotnet v5.0
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '5.0.x' # SDK Version to use.
 
     - name: Restore
       run: dotnet restore
