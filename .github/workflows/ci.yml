@@ -87,7 +87,7 @@ jobs:
       
     - name: Resolve project name
       shell: pwsh
-      run: Write-Host "projectName=$(${env:GITHUB_REPOSITORY}.substring(${env:GITHUB_REPOSITORY}.IndexOf('/') + 1))" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      run: Write-Host "projectName=$(${env:GITHUB_REPOSITORY}.substring(${env:GITHUB_REPOSITORY}.IndexOf('/') + 1))" | Out-File -FilePath ${env:GITHUB_ENV} -Encoding utf8 -Append
       
     - name: Output environment variables
       shell: bash
