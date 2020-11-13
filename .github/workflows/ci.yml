@@ -89,6 +89,12 @@ jobs:
       shell: pwsh
       run: Write-Host "projectName=$(${env:GITHUB_REPOSITORY}.substring(${env:GITHUB_REPOSITORY}.IndexOf('/') + 1))" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
       
+    - name: Output environment variables
+      shell: bash
+      run: |
+        value=`cat $GITHUB_ENV `
+        echo $(echo $value)
+    
     - name: Pack
       run: dotnet pack "./${{ env.projectName }}/${{ env.projectName }}.csproj" -c Release --no-build --include-symbols -o $GITHUB_WORKSPACE/staging
 
@@ -150,7 +156,7 @@ jobs:
         value=`cat version.txt`
         echo NuGetVersionV2=$(echo $value) >> $GITHUB_ENV 
     
-    - name: ResolveProject
+    - name: Resolve project name
       run: echo "projectName=$(${env:GITHUB_REPOSITORY}.substring(${env:GITHUB_REPOSITORY}.IndexOf('/') + 1))" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
       
     - name: Setup nuget
@@ -167,7 +173,7 @@ jobs:
 #        NUGET_APIKEY: ${{ secrets.NUGET_APIKEY }}
 #      run: mono $NUGET_EXE push *.*.symbols.nupkg $NUGET_APIKEY -source https://api.nuget.org/v3/index.json
 #
-#    - name: Create Release
+#    - name: Create release
 #      id: create_release
 #      uses: actions/create-release@v1.1.4
 #      env:
@@ -178,7 +184,7 @@ jobs:
 #        draft: false
 #        prerelease: ${{ contains(env.NuGetVersionV2, 'beta') }}
 #    
-#    - name: Upload Release Asset for package
+#    - name: Upload release asset for package
 #      id: upload-release-asset-package
 #      uses: actions/upload-release-asset@v1.0.2
 #      env:
@@ -189,7 +195,7 @@ jobs:
 #        asset_name: ${{ env.projectName }}.${{ env.NuGetVersionV2 }}.nupkg
 #        asset_content_type: application/zip
 #    
-#    - name: Upload Release Asset for symbol package
+#    - name: Upload release asset for symbol package
 #      id: upload-release-asset-symbolpackage
 #      uses: actions/upload-release-asset@v1.0.2
 #      env:
