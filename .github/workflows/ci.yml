@@ -89,12 +89,6 @@ jobs:
       shell: pwsh
       run: Add-Content -Path ${env:GITHUB_ENV} "`nprojectName=$(${env:GITHUB_REPOSITORY}.substring(${env:GITHUB_REPOSITORY}.IndexOf('/') + 1))" -Encoding utf8
       
-    - name: Output environment variables
-      shell: bash
-      run: |
-        value=`cat $GITHUB_ENV `
-        echo $value
-    
     - name: Pack
       run: dotnet pack "./${{ env.projectName }}/${{ env.projectName }}.csproj" -c Release --no-build --include-symbols -o $GITHUB_WORKSPACE/staging
 
@@ -156,8 +150,15 @@ jobs:
         value=`cat version.txt`
         echo NuGetVersionV2=$(echo $value) >> $GITHUB_ENV 
     
+    - name: Output environment variables
+      shell: bash
+      run: |
+        value=`cat $GITHUB_ENV `
+        echo $value
+    
     - name: Resolve project name
-      run: echo "projectName=$(${env:GITHUB_REPOSITORY}.substring(${env:GITHUB_REPOSITORY}.IndexOf('/') + 1))" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      shell: pwsh
+      run: Add-Content -Path ${env:GITHUB_ENV} "`nprojectName=$(${env:GITHUB_REPOSITORY}.substring(${env:GITHUB_REPOSITORY}.IndexOf('/') + 1))" -Encoding utf8
       
     - name: Setup nuget
       uses: olegtarasov/download-nuget@v1
