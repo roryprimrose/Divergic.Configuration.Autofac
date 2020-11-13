@@ -130,7 +130,7 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
-#    if: github.repository_owner == 'roryprimrose' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v'))
+    if: github.repository_owner == 'roryprimrose' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v'))
 
     steps:
     
@@ -150,12 +150,6 @@ jobs:
         value=`cat version.txt`
         echo NuGetVersionV2=$(echo $value) >> $GITHUB_ENV 
     
-    - name: Output environment variables
-      shell: bash
-      run: |
-        value=`cat $GITHUB_ENV `
-        echo $value
-    
     - name: Resolve project name
       shell: pwsh
       run: Add-Content -Path ${env:GITHUB_ENV} "`nprojectName=$(${env:GITHUB_REPOSITORY}.substring(${env:GITHUB_REPOSITORY}.IndexOf('/') + 1))" -Encoding utf8
@@ -169,40 +163,40 @@ jobs:
 #    - name: Push generated package to GitHub registry
 #      run: mono $NUGET_EXE push *.*.symbols.nupkg -Source "GPR"
 
-#    - name: Publish to NuGet.org
-#      env: 
-#        NUGET_APIKEY: ${{ secrets.NUGET_APIKEY }}
-#      run: mono $NUGET_EXE push *.*.symbols.nupkg $NUGET_APIKEY -source https://api.nuget.org/v3/index.json
-#
-#    - name: Create release
-#      id: create_release
-#      uses: actions/create-release@v1.1.4
-#      env:
-#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#      with:
-#        tag_name: ${{ env.NuGetVersionV2 }}
-#        release_name: Release ${{ env.NuGetVersionV2 }}
-#        draft: false
-#        prerelease: ${{ contains(env.NuGetVersionV2, 'beta') }}
-#    
-#    - name: Upload release asset for package
-#      id: upload-release-asset-package
-#      uses: actions/upload-release-asset@v1.0.2
-#      env:
-#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#      with:
-#        upload_url: ${{ steps.create_release.outputs.upload_url }}
-#        asset_path: ${{ env.projectName }}.${{ env.NuGetVersionV2 }}.nupkg
-#        asset_name: ${{ env.projectName }}.${{ env.NuGetVersionV2 }}.nupkg
-#        asset_content_type: application/zip
-#    
-#    - name: Upload release asset for symbol package
-#      id: upload-release-asset-symbolpackage
-#      uses: actions/upload-release-asset@v1.0.2
-#      env:
-#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#      with:
-#        upload_url: ${{ steps.create_release.outputs.upload_url }}
-#        asset_path: ${{ env.projectName }}.${{ env.NuGetVersionV2 }}.symbols.nupkg
-#        asset_name: ${{ env.projectName }}.${{ env.NuGetVersionV2 }}.symbols.nupkg
-#        asset_content_type: application/zip
+    - name: Publish to NuGet.org
+      env: 
+        NUGET_APIKEY: ${{ secrets.NUGET_APIKEY }}
+      run: mono $NUGET_EXE push *.*.symbols.nupkg $NUGET_APIKEY -source https://api.nuget.org/v3/index.json
+
+    - name: Create release
+      id: create_release
+      uses: actions/create-release@v1.1.4
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ env.NuGetVersionV2 }}
+        release_name: Release ${{ env.NuGetVersionV2 }}
+        draft: false
+        prerelease: ${{ contains(env.NuGetVersionV2, 'beta') }}
+    
+    - name: Upload release asset for package
+      id: upload-release-asset-package
+      uses: actions/upload-release-asset@v1.0.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ env.projectName }}.${{ env.NuGetVersionV2 }}.nupkg
+        asset_name: ${{ env.projectName }}.${{ env.NuGetVersionV2 }}.nupkg
+        asset_content_type: application/zip
+    
+    - name: Upload release asset for symbol package
+      id: upload-release-asset-symbolpackage
+      uses: actions/upload-release-asset@v1.0.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ env.projectName }}.${{ env.NuGetVersionV2 }}.symbols.nupkg
+        asset_name: ${{ env.projectName }}.${{ env.NuGetVersionV2 }}.symbols.nupkg
+        asset_content_type: application/zip
