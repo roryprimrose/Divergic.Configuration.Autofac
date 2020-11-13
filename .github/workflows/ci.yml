@@ -86,7 +86,8 @@ jobs:
       if: github.event_name == 'pull_request' && github.repository_owner == 'roryprimrose'       # Don't run on forks
       
     - name: ResolveProject
-      run: echo "projectName=$(${env:GITHUB_REPOSITORY}.substring(${env:GITHUB_REPOSITORY}.IndexOf('/') + 1))" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      shell: pwsh
+      run: Write-Host "projectName=$(${env:GITHUB_REPOSITORY}.substring(${env:GITHUB_REPOSITORY}.IndexOf('/') + 1))" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       
     - name: Pack
       run: dotnet pack "./${{ env.projectName }}/${{ env.projectName }}.csproj" -c Release --no-build --include-symbols -o $GITHUB_WORKSPACE/staging
