@@ -56,6 +56,28 @@ var container = builder.Build();
 
 Need to resolve a root configuration object from something other than a JSON file? The ```ConfigurationModule``` will accept any ```IConfigurationResolver```. You can write any custom resolver and provide it to the module.
 
+# Environment Variable Override
+
+Sometimes you need to be able to change a configuration value without having to redeploy the application or change the application configuration file. Just changing the application configuration file can require a redeployment to deliver the change to a target system. This can be done by using the `EnvironmentOverride` attribute. A common scenario here is Azure Functions which uses Environment Variables via configuration settings in the Azure portal. 
+
+The `ConfigurationModule` class will detect the `EnvironmentOverride` attribute being defined on a property and will attempt to resolve the value. If the environment variable defined by the attribute exists, has a value and that value can be converted to the property type then the configuration object will be updated with the value of the environment variable before it is registered in Autofac. If any of these conditions are not met then the existing value from the configuration resolver will remain on the object.
+
+
+```csharp
+public class Storage : IStorage
+{
+    [EnvironmentOverride("Application.BlobStorageConnection")]
+    public string BlobStorage { get; set; }
+
+    [EnvironmentOverride("Application.DatabaseConnection")]
+    public string Database { get; set; }
+
+    [EnvironmentOverride("Application.TableStorageConnection")]
+    public string TableStorage { get; set; }
+}
+```
+The advantage of this design is that application configuration can be resolved with a pre-allocation of an environment override that only comes into play when the environment variable has been set.
+
 # Example
 
 Consider the following JSON configuration.
