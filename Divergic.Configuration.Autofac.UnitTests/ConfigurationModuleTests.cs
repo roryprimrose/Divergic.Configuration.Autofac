@@ -16,10 +16,7 @@
         [Fact]
         public void CanRegisterTypeWithCircularReferenceTest()
         {
-            var value = new Parent
-            {
-                Child = new Child()
-            };
+            var value = new Parent {Child = new Child()};
 
             value.Child.Parent = value;
 
@@ -41,7 +38,7 @@
         public void CanRegisterTypeWithUriPropertyTest()
         {
             var builder = new ContainerBuilder();
-            var resolver = new InMemoryResolver<Location>();
+            var resolver = new ModelBuilderResolver<Location>();
             var sut = new ConfigurationModule(resolver);
 
             builder.RegisterModule(sut);
@@ -65,11 +62,12 @@
 
             var container = builder.Build();
 
-            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 4);
+            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 5);
             container.Should().HaveRegistered<IConfig>();
             container.Should().HaveRegistered<Config>();
             container.Should().HaveRegistered<IFirstJob>();
             container.Should().HaveRegistered<FirstJob>();
+            container.Should().HaveRegistered<EnvironmentValues>();
             container.Should().NotHaveRegistered<IStorage>();
             container.Should().NotHaveRegistered<Storage>();
         }
@@ -78,7 +76,7 @@
         public void DoesNotRegisterStringTypeConfigTest()
         {
             var builder = new ContainerBuilder();
-            var resolver = new InMemoryResolver<string>();
+            var resolver = new ModelBuilderResolver<string>();
             var sut = new ConfigurationModule(resolver);
 
             builder.RegisterModule(sut);
@@ -93,7 +91,7 @@
         public void DoesNotRegisterValueTypeConfigTest()
         {
             var builder = new ContainerBuilder();
-            var resolver = new InMemoryResolver<int>();
+            var resolver = new ModelBuilderResolver<int>();
             var sut = new ConfigurationModule(resolver);
 
             builder.RegisterModule(sut);
@@ -105,10 +103,133 @@
         }
 
         [Fact]
+        public void IgnoresEnvironmentOverrideWhenAttributeDefinedAndEnvironmentVariableValueIsInvalid()
+        {
+            var builder = new ContainerBuilder();
+            var config = Model.Create<EnvironmentValues>();
+            var resolver = new InstanceResolver(config);
+            var expectedBool = config.BoolData;
+            var expectedGuid = config.GuidData;
+            var expectedInt = config.IntData;
+            var expectedString = config.StringData;
+
+            Environment.SetEnvironmentVariable("Custom.BoolData", Guid.NewGuid().ToString());
+            Environment.SetEnvironmentVariable("Custom.GuidData", "this is not a guid");
+            Environment.SetEnvironmentVariable("Custom.IntData", "definitely not an int");
+
+            var sut = new ConfigurationModule(resolver);
+
+            builder.RegisterModule(sut);
+
+            var container = builder.Build();
+
+            // There are several registrations which aren't expected because of Uri properties being resolved
+            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 1);
+            container.Should().HaveRegistered<EnvironmentValues>();
+
+            var actual = container.Resolve<EnvironmentValues>();
+
+            actual.BoolData.Should().Be(expectedBool);
+            actual.GuidData.Should().Be(expectedGuid);
+            actual.IntData.Should().Be(expectedInt);
+            actual.StringData.Should().Be(expectedString);
+        }
+
+        [Fact]
+        public void IgnoresEnvironmentOverrideWhenAttributeDefinedButNoEnvironmentVariableFound()
+        {
+            var builder = new ContainerBuilder();
+            var config = Model.Create<EnvironmentValues>();
+            var resolver = new InstanceResolver(config);
+            var expectedBool = config.BoolData;
+            var expectedGuid = config.GuidData;
+            var expectedInt = config.IntData;
+            var expectedString = config.StringData;
+
+            var sut = new ConfigurationModule(resolver);
+
+            builder.RegisterModule(sut);
+
+            var container = builder.Build();
+
+            // There are several registrations which aren't expected because of Uri properties being resolved
+            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 1);
+            container.Should().HaveRegistered<EnvironmentValues>();
+
+            var actual = container.Resolve<EnvironmentValues>();
+
+            actual.BoolData.Should().Be(expectedBool);
+            actual.GuidData.Should().Be(expectedGuid);
+            actual.IntData.Should().Be(expectedInt);
+            actual.StringData.Should().Be(expectedString);
+        }
+
+        [Fact]
+        public void IgnoresEnvironmentOverrideWhenNoAttributeDefined()
+        {
+            var builder = new ContainerBuilder();
+            var config = Model.Create<Storage>();
+            var resolver = new InstanceResolver(config);
+            var expectedBlob = config.BlobStorage;
+            var expectedDatabase = config.Database;
+            var expectedTable = config.TableStorage;
+
+            var sut = new ConfigurationModule(resolver);
+
+            builder.RegisterModule(sut);
+
+            var container = builder.Build();
+
+            // There are several registrations which aren't expected because of Uri properties being resolved
+            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 2);
+            container.Should().HaveRegistered<Storage>();
+
+            var actual = container.Resolve<IStorage>();
+
+            actual.BlobStorage.Should().Be(expectedBlob);
+            actual.Database.Should().Be(expectedDatabase);
+            actual.TableStorage.Should().Be(expectedTable);
+        }
+
+        [Fact]
+        public void OverridesPropertiesWithEnvironmentVariablesWhenAttributeDefined()
+        {
+            var builder = new ContainerBuilder();
+            var config = Model.Create<EnvironmentValues>();
+            var resolver = new InstanceResolver(config);
+            var expectedString = Guid.NewGuid().ToString();
+            var expectedBool = Model.Create<bool>();
+            var expectedGuid = Guid.NewGuid();
+            var expectedInt = Environment.TickCount;
+
+            Environment.SetEnvironmentVariable("Custom.BoolData", expectedBool.ToString());
+            Environment.SetEnvironmentVariable("Custom.GuidData", expectedGuid.ToString());
+            Environment.SetEnvironmentVariable("Custom.IntData", expectedInt.ToString());
+            Environment.SetEnvironmentVariable("Custom.StringData", expectedString);
+
+            var sut = new ConfigurationModule(resolver);
+
+            builder.RegisterModule(sut);
+
+            var container = builder.Build();
+
+            // There are several registrations which aren't expected because of Uri properties being resolved
+            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 1);
+            container.Should().HaveRegistered<EnvironmentValues>();
+
+            var actual = container.Resolve<EnvironmentValues>();
+
+            actual.BoolData.Should().Be(expectedBool);
+            actual.GuidData.Should().Be(expectedGuid);
+            actual.IntData.Should().Be(expectedInt);
+            actual.StringData.Should().Be(expectedString);
+        }
+
+        [Fact]
         public void RegistersConfigurationWithClassHavingIndexerPropertyTest()
         {
             var builder = new ContainerBuilder();
-            var resolver = new InMemoryResolver<DataSet>();
+            var resolver = new ModelBuilderResolver<DataSet>();
             var sut = new ConfigurationModule(resolver);
 
             builder.RegisterModule(sut);
@@ -129,14 +250,14 @@
         public void RegistersConfigurationWithNestedTypesTest()
         {
             var builder = new ContainerBuilder();
-            var resolver = new InMemoryResolver<Config>();
+            var resolver = new ModelBuilderResolver<Config>();
             var sut = new ConfigurationModule(resolver);
 
             builder.RegisterModule(sut);
 
             var container = builder.Build();
 
-            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 6);
+            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 7);
 
             container.Should().HaveRegistered<IConfig>();
             container.Should().HaveRegistered<Config>();
@@ -166,7 +287,7 @@
         public void RegistersConfigurationWithoutNestedTypesTest()
         {
             var builder = new ContainerBuilder();
-            var resolver = new InMemoryResolver<FirstJob>();
+            var resolver = new ModelBuilderResolver<FirstJob>();
             var sut = new ConfigurationModule(resolver);
 
             builder.RegisterModule(sut);
@@ -182,7 +303,7 @@
         public void RegistersInstanceWithoutInterfaceTest()
         {
             var builder = new ContainerBuilder();
-            var resolver = new InMemoryResolver<NoDefinition>();
+            var resolver = new ModelBuilderResolver<NoDefinition>();
             var sut = new ConfigurationModule(resolver);
 
             builder.RegisterModule(sut);
@@ -208,7 +329,8 @@
         }
 
         [Fact]
-        [SuppressMessage("Usage", "CA1806:Do not ignore method results", Justification = "The constructor is what is being tested")]
+        [SuppressMessage("Usage", "CA1806:Do not ignore method results",
+            Justification = "The constructor is what is being tested")]
         public void ThrowsExceptionWhenCreatedWithNullResolverTest()
         {
             Action action = () => new ConfigurationModule(null);
@@ -218,50 +340,14 @@
 
         private class Child
         {
-            public Parent Parent
-            {
-                get;
-                set;
-            }
+            public Parent Parent { get; set; }
         }
 
-        [SuppressMessage("Usage", "CA1812:Class not instantiated", Justification = "The is used by Autofac registrations")]
+        [SuppressMessage("Usage", "CA1812:Class not instantiated",
+            Justification = "The is used by Autofac registrations")]
         private class DataSet
         {
-            public Collection<Location> Locations
-            {
-                get;
-                set;
-            }
-        }
-
-        [SuppressMessage("Usage", "CA1812:Class not instantiated", Justification = "The is used by Autofac registrations")]
-        private class Location
-        {
-            public Uri Address
-            {
-                get;
-                set;
-            }
-        }
-
-        private class Parent
-        {
-            public Child Child
-            {
-                get;
-                set;
-            }
-        }
-
-        private class InMemoryResolver<T> : IConfigurationResolver
-        {
-            public object Resolve()
-            {
-                return Model.Create(ConfigType);
-            }
-
-            private static Type ConfigType => typeof(T);
+            public Collection<Location> Locations { get; set; }
         }
 
         private class InstanceResolver : IConfigurationResolver
@@ -281,6 +367,23 @@
             public Type ConfigType => _value.GetType();
         }
 
+        [SuppressMessage("Usage", "CA1812:Class not instantiated",
+            Justification = "The is used by Autofac registrations")]
+        private class Location
+        {
+            public Uri Address { get; set; }
+        }
+
+        private class ModelBuilderResolver<T> : IConfigurationResolver
+        {
+            public object Resolve()
+            {
+                return Model.Create(ConfigType);
+            }
+
+            private static Type ConfigType => typeof(T);
+        }
+
         private class NullPropertyResolverConfig : IConfigurationResolver
         {
             public object Resolve()
@@ -297,6 +400,11 @@
             {
                 return null;
             }
+        }
+
+        private class Parent
+        {
+            public Child Child { get; set; }
         }
     }
 }

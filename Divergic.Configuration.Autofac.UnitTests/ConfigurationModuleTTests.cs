@@ -19,7 +19,7 @@ namespace Divergic.Configuration.Autofac.UnitTests
 
             var container = builder.Build();
 
-            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 6);
+            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 7);
 
             container.Should().HaveRegistered<IConfig>();
             container.Should().HaveRegistered<Config>();
