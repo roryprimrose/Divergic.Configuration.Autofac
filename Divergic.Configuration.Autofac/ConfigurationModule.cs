@@ -2,8 +2,11 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.Linq;
+    using System.Reflection;
     using global::Autofac;
+    using Module = global::Autofac.Module;
 
     /// <summary>
     /// The <see cref="ConfigurationModule"/>
@@ -49,6 +52,49 @@
             RegisterConfigTypes(builder, configuration, referenceTracker);
         }
 
+        private static void AssignEnvironmentOverride(object configuration, PropertyInfo property)
+        {
+            // Check if there is an environment variable override defined on the property
+            var attribute = property.GetCustomAttributes().OfType<EnvironmentOverrideAttribute>().FirstOrDefault();
+
+            if (attribute == null)
+            {
+                return;
+            }
+
+            var value = Environment.GetEnvironmentVariable(attribute.Variable);
+
+            if (value == null)
+            {
+                return;
+            }
+
+            try
+            {
+                var converter = TypeDescriptor.GetConverter(property.PropertyType);
+                object converted;
+
+                if (converter.CanConvertFrom(typeof(string)))
+                {
+                    converted = converter.ConvertFromString(value);
+                }
+                else
+                {
+                    // Try a straight change type
+                    // Attempt to convert the value to the target type
+                    converted = Convert.ChangeType(value, property.PropertyType);
+                }
+
+                // If we got this far then the conversion from the environment variable string was ok to the target property type
+                // Set the value back on the property
+                property.SetValue(configuration, converted);
+            }
+            catch (Exception)
+            {
+                // We don't want to break the application if we don't have good data to play with
+            }
+        }
+
         private static void RegisterConfigTypes(
             ContainerBuilder builder,
             object configuration,
@@ -83,7 +129,7 @@
             {
                 builder.RegisterInstance(configuration).AsImplementedInterfaces();
             }
-            
+
             builder.RegisterInstance(configuration).AsSelf();
 
             referenceTracker.Add(configuration);
@@ -105,8 +151,10 @@
                     continue;
                 }
 
+                AssignEnvironmentOverride(configuration, property);
+
                 var value = property.GetValue(configuration);
-                
+
                 // Recurse into the child properties
                 RegisterConfigTypes(builder, value, referenceTracker);
             }

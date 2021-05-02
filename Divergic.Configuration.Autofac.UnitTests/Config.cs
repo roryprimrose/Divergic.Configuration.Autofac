@@ -9,13 +9,32 @@
 
     public interface IConfig
     {
+        EnvironmentValues Environment { get; }
+
         FirstJob FirstJob { get; }
 
         Storage Storage { get; }
     }
 
+    public class EnvironmentValues
+    {
+        [EnvironmentOverride("Custom.BoolData")]
+        public bool BoolData { get; set; }
+
+        [EnvironmentOverride("Custom.GuidData")]
+        public Guid GuidData { get; set; }
+
+        [EnvironmentOverride("Custom.IntData")]
+        public int IntData { get; set; }
+
+        [EnvironmentOverride("Custom.StringData")]
+        public string StringData { get; set; }
+    }
+
     public class Config : IConfig
     {
+        public EnvironmentValues Environment { get; set; }
+
         public FirstJob FirstJob { get; set; }
 
         public Storage Storage { get; set; }
