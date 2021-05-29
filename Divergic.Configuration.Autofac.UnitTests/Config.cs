@@ -31,6 +31,11 @@
         public string StringData { get; set; }
     }
 
+    public class EnvironmentValuesWithoutAttributes
+    {
+        public string StringData { get; set; } = "Custom.StringData";
+    }
+
     public class Config : IConfig
     {
         public EnvironmentValues Environment { get; set; }

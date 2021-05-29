@@ -103,6 +103,29 @@
         }
 
         [Fact]
+        public void IgnoresEnvironmentMappingWhenNoEnvironmentVariableFound()
+        {
+            var builder = new ContainerBuilder();
+            var config = new EnvironmentValuesWithoutAttributes();
+            var resolver = new InstanceResolver(config);
+            var expectedString = config.StringData;
+
+            var sut = new ConfigurationModule(resolver);
+
+            builder.RegisterModule(sut);
+
+            var container = builder.Build();
+
+            // There are several registrations which aren't expected because of Uri properties being resolved
+            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 1);
+            container.Should().HaveRegistered<EnvironmentValuesWithoutAttributes>();
+
+            var actual = container.Resolve<EnvironmentValuesWithoutAttributes>();
+
+            actual.StringData.Should().Be(expectedString);
+        }
+
+        [Fact]
         public void IgnoresEnvironmentOverrideWhenAttributeDefinedAndEnvironmentVariableValueIsInvalid()
         {
             var builder = new ContainerBuilder();
@@ -189,6 +212,31 @@
             actual.BlobStorage.Should().Be(expectedBlob);
             actual.Database.Should().Be(expectedDatabase);
             actual.TableStorage.Should().Be(expectedTable);
+        }
+
+        [Fact]
+        public void MapsPropertyWithEnvironmentVariablesWhenPropertyValueMatchesEnvironmentVariable()
+        {
+            var builder = new ContainerBuilder();
+            var config = new EnvironmentValuesWithoutAttributes();
+            var resolver = new InstanceResolver(config);
+            var expectedString = Guid.NewGuid().ToString();
+
+            Environment.SetEnvironmentVariable(config.StringData, expectedString);
+
+            var sut = new ConfigurationModule(resolver);
+
+            builder.RegisterModule(sut);
+
+            var container = builder.Build();
+
+            // There are several registrations which aren't expected because of Uri properties being resolved
+            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 1);
+            container.Should().HaveRegistered<EnvironmentValuesWithoutAttributes>();
+
+            var actual = container.Resolve<EnvironmentValuesWithoutAttributes>();
+
+            actual.StringData.Should().Be(expectedString);
         }
 
         [Fact]

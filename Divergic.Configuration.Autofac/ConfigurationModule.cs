@@ -62,7 +62,14 @@
                 return;
             }
 
-            var value = Environment.GetEnvironmentVariable(attribute.Variable);
+            var key = attribute.Variable;
+
+            AssignEnvironmentVariable(configuration, property, key);
+        }
+
+        private static void AssignEnvironmentVariable(object configuration, PropertyInfo property, string key)
+        {
+            var value = Environment.GetEnvironmentVariable(key);
 
             if (value == null)
             {
@@ -151,9 +158,17 @@
                     continue;
                 }
 
+                // Attempt to assign the property value to an environment variable identified by the attribute
                 AssignEnvironmentOverride(configuration, property);
 
                 var value = property.GetValue(configuration);
+
+                if (value is string stringValue)
+                {
+                    // The value of the property may point to an environment variable
+                    // Attempt to assign the property value to the environment variable
+                    AssignEnvironmentVariable(configuration, property, stringValue);
+                }
 
                 // Recurse into the child properties
                 RegisterConfigTypes(builder, value, referenceTracker);
