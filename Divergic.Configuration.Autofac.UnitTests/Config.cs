@@ -33,7 +33,7 @@
 
     public class EnvironmentValuesWithoutAttributes
     {
-        public string StringData { get; set; } = "Custom.StringData";
+        public string StringData { get; set; } = "Custom.Redirected";
     }
 
     public class Config : IConfig

@@ -109,6 +109,8 @@
             var config = new EnvironmentValuesWithoutAttributes();
             var resolver = new InstanceResolver(config);
             var expectedString = config.StringData;
+            
+            Environment.SetEnvironmentVariable(expectedString, null);
 
             var sut = new ConfigurationModule(resolver);
 
