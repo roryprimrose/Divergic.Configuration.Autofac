@@ -1,8 +1,8 @@
 # Introduction
 
-The Divergic.Configuration.Autofac NuGet package provides an Autofac module for registering nested configuration types. This is helpful when wanting dependency injection of configuration types loaded from JSON configuration in ASP.Net core.
+The Divergic.Configuration.Autofac NuGet package provides an Autofac module for registering nested configuration types. This is helpful when wanting dependency injection of configuration types loaded from JSON configuration.
 
-[![GitHub license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/roryprimrose/Divergic.Configuration.Autofac/blob/master/LICENSE)&nbsp;&nbsp;&nbsp;[![Nuget](https://img.shields.io/nuget/v/Divergic.Configuration.Autofac.svg)&nbsp;![Nuget](https://img.shields.io/nuget/dt/Divergic.Configuration.Autofac.svg)](https://www.nuget.org/packages/Divergic.Configuration.Autofac)
+[![GitHub license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/roryprimrose/Divergic.Configuration.Autofac/blob/master/LICENSE)&nbsp;&nbsp;&nbsp;[![Nuget](https://img.shields.io/nuget/v/Divergic.Configuration.Autofac.svg)&nbsp;&nbsp;&nbsp;![Nuget](https://img.shields.io/nuget/dt/Divergic.Configuration.Autofac.svg)](https://www.nuget.org/packages/Divergic.Configuration.Autofac)
 
 [![Actions Status](https://github.com/roryprimrose/Divergic.Configuration.Autofac/workflows/CI/badge.svg)](https://github.com/roryprimrose/Divergic.Configuration.Autofac/actions)
 
@@ -38,7 +38,7 @@ builder.RegisterModule(module);
 var container = builder.Build();
 ```
 
-Need environment configuration override support? This would work in ASP.Net core.
+Need environment configuration override support? Use the `EnvironmentJsonResolver` to merge configuration for a specific environment.
 
 ```csharp
 var env = builderContext.HostingEnvironment;
@@ -77,6 +77,10 @@ public class Storage : IStorage
 }
 ```
 The advantage of this design is that application configuration can be resolved with a pre-allocation of an environment override that only comes into play when the environment variable has been set.
+
+# Environment Variable Mapping
+
+The module can detect if a string property is a reference to an environment variable. In this case it will resolve the configuration value from the environment variable using the same rules as the Environment Variable Override above.
 
 # Example
 
