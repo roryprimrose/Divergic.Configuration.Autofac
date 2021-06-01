@@ -14,6 +14,22 @@
         private const int DefaultRegistrationCount = 1;
 
         [Fact]
+        public void CanRegisterTypeWhenPropertyThrowsException()
+        {
+            var builder = new ContainerBuilder();
+            var resolver = new ModelBuilderResolver<ExceptionProperty>();
+            var sut = new ConfigurationModule(resolver);
+
+            builder.RegisterModule(sut);
+
+            var container = builder.Build();
+
+            // There are several registrations which aren't expected because of Uri properties being resolved
+            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 1);
+            container.Should().HaveRegistered<ExceptionProperty>();
+        }
+
+        [Fact]
         public void CanRegisterTypeWithCircularReferenceTest()
         {
             var value = new Parent {Child = new Child()};
@@ -35,6 +51,25 @@
         }
 
         [Fact]
+        public void CanRegisterTypeWithReadOnlyProperties()
+        {
+            // Try to get the read only property to be processed by using an environment override
+            Environment.SetEnvironmentVariable(nameof(ReadOnlyProperty) + "." + nameof(ReadOnlyProperty.Timeout), "3");
+
+            var builder = new ContainerBuilder();
+            var resolver = new ModelBuilderResolver<ReadOnlyProperty>();
+            var sut = new ConfigurationModule(resolver);
+
+            builder.RegisterModule(sut);
+
+            var container = builder.Build();
+
+            // There are several registrations which aren't expected because of Uri properties being resolved
+            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 1);
+            container.Should().HaveRegistered<ReadOnlyProperty>();
+        }
+
+        [Fact]
         public void CanRegisterTypeWithUriPropertyTest()
         {
             var builder = new ContainerBuilder();
@@ -49,6 +84,27 @@
             container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 5);
             container.Should().HaveRegistered<Location>();
             container.Should().HaveRegistered<Uri>();
+        }
+
+        [Fact]
+        public void CanRegisterTypeWithWriteOnlyProperties()
+        {
+            // Try to get the read only property to be processed by using an environment override
+            Environment.SetEnvironmentVariable(nameof(WriteOnlyProperty) + "." + nameof(WriteOnlyProperty.Timeout),
+                "3");
+
+            var builder = new ContainerBuilder();
+            var config = new WriteOnlyProperty();
+            var resolver = new InstanceResolver(config);
+            var sut = new ConfigurationModule(resolver);
+
+            builder.RegisterModule(sut);
+
+            var container = builder.Build();
+
+            // There are several registrations which aren't expected because of Uri properties being resolved
+            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 1);
+            container.Should().HaveRegistered<WriteOnlyProperty>();
         }
 
         [Fact]
@@ -109,7 +165,7 @@
             var config = new EnvironmentValuesWithoutAttributes();
             var resolver = new InstanceResolver(config);
             var expectedString = config.StringData;
-            
+
             Environment.SetEnvironmentVariable(expectedString, null);
 
             var sut = new ConfigurationModule(resolver);
@@ -400,6 +456,13 @@
             public Collection<Location> Locations { get; set; }
         }
 
+        private class ExceptionProperty
+        {
+            public TimeSpan Timeout => TimeSpan.FromSeconds(int.Parse(TimeoutInSeconds));
+
+            public string TimeoutInSeconds { get; set; } = "5";
+        }
+
         private class InstanceResolver : IConfigurationResolver
         {
             private readonly object _value;
@@ -455,6 +518,24 @@
         private class Parent
         {
             public Child Child { get; set; }
+        }
+
+        private class ReadOnlyProperty
+        {
+            [EnvironmentOverride(nameof(ReadOnlyProperty) + "." + nameof(Timeout))]
+            public TimeSpan Timeout => TimeSpan.FromSeconds(TimeoutInSeconds);
+
+            public int TimeoutInSeconds { get; set; } = 5;
+        }
+
+        private class WriteOnlyProperty
+        {
+            public TimeSpan StoredValue { get; private set; } = TimeSpan.Zero;
+
+            [EnvironmentOverride(nameof(WriteOnlyProperty) + "." + nameof(Timeout))]
+            public TimeSpan Timeout { set => StoredValue = value; }
+
+            public int TimeoutInSeconds { get; set; } = 5;
         }
     }
 }
