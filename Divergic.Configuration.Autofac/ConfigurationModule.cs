@@ -149,6 +149,12 @@
 
             foreach (var property in properties)
             {
+                if (property.CanRead == false)
+                {
+                    // Ignore any property that we can't read
+                    continue;
+                }
+
                 var parameters = property.GetIndexParameters();
 
                 if (parameters.Length > 0)
@@ -158,16 +164,30 @@
                     continue;
                 }
 
-                // Attempt to assign the property value to an environment variable identified by the attribute
-                AssignEnvironmentOverride(configuration, property);
+                object value;
 
-                var value = property.GetValue(configuration);
-
-                if (value is string stringValue)
+                try
                 {
-                    // The value of the property may point to an environment variable
-                    // Attempt to assign the property value to the environment variable
-                    AssignEnvironmentVariable(configuration, property, stringValue);
+                    value = property.GetValue(configuration);
+                }
+                catch (Exception)
+                {
+                    // We failed to read the property so we can't process it
+                    // We also don't want to crash the application so ignore this failure
+                    continue;
+                }
+
+                if (property.CanWrite)
+                {
+                    // Attempt to assign the property value to an environment variable identified by the attribute
+                    AssignEnvironmentOverride(configuration, property);
+
+                    if (value is string stringValue)
+                    {
+                        // The value of the property may point to an environment variable
+                        // Attempt to assign the property value to the environment variable
+                        AssignEnvironmentVariable(configuration, property, stringValue);
+                    }
                 }
 
                 // Recurse into the child properties
