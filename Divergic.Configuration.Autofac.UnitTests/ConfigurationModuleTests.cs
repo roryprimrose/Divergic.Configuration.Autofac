@@ -32,7 +32,7 @@
         [Fact]
         public void CanRegisterTypeWithCircularReferenceTest()
         {
-            var value = new Parent {Child = new Child()};
+            var value = new Parent { Child = new Child() };
 
             value.Child.Parent = value;
 
@@ -54,19 +54,28 @@
         public void CanRegisterTypeWithReadOnlyProperties()
         {
             // Try to get the read only property to be processed by using an environment override
-            Environment.SetEnvironmentVariable(nameof(ReadOnlyProperty) + "." + nameof(ReadOnlyProperty.Timeout), "3");
+            var name = nameof(ReadOnlyProperty) + "." + nameof(ReadOnlyProperty.Timeout);
 
-            var builder = new ContainerBuilder();
-            var resolver = new ModelBuilderResolver<ReadOnlyProperty>();
-            var sut = new ConfigurationModule(resolver);
+            Environment.SetEnvironmentVariable(name, "3");
 
-            builder.RegisterModule(sut);
+            try
+            {
+                var builder = new ContainerBuilder();
+                var resolver = new ModelBuilderResolver<ReadOnlyProperty>();
+                var sut = new ConfigurationModule(resolver);
 
-            var container = builder.Build();
+                builder.RegisterModule(sut);
 
-            // There are several registrations which aren't expected because of Uri properties being resolved
-            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 1);
-            container.Should().HaveRegistered<ReadOnlyProperty>();
+                var container = builder.Build();
+
+                // There are several registrations which aren't expected because of Uri properties being resolved
+                container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 1);
+                container.Should().HaveRegistered<ReadOnlyProperty>();
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(name, null);
+            }
         }
 
         [Fact]
@@ -90,21 +99,29 @@
         public void CanRegisterTypeWithWriteOnlyProperties()
         {
             // Try to get the read only property to be processed by using an environment override
-            Environment.SetEnvironmentVariable(nameof(WriteOnlyProperty) + "." + nameof(WriteOnlyProperty.Timeout),
-                "3");
+            var name = nameof(WriteOnlyProperty) + "." + nameof(WriteOnlyProperty.Timeout);
 
-            var builder = new ContainerBuilder();
-            var config = new WriteOnlyProperty();
-            var resolver = new InstanceResolver(config);
-            var sut = new ConfigurationModule(resolver);
+            Environment.SetEnvironmentVariable(name, "3");
 
-            builder.RegisterModule(sut);
+            try
+            {
+                var builder = new ContainerBuilder();
+                var config = new WriteOnlyProperty();
+                var resolver = new InstanceResolver(config);
+                var sut = new ConfigurationModule(resolver);
 
-            var container = builder.Build();
+                builder.RegisterModule(sut);
 
-            // There are several registrations which aren't expected because of Uri properties being resolved
-            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 1);
-            container.Should().HaveRegistered<WriteOnlyProperty>();
+                var container = builder.Build();
+
+                // There are several registrations which aren't expected because of Uri properties being resolved
+                container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 1);
+                container.Should().HaveRegistered<WriteOnlyProperty>();
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(name, null);
+            }
         }
 
         [Fact]
@@ -118,12 +135,15 @@
 
             var container = builder.Build();
 
-            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 5);
+            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 8);
             container.Should().HaveRegistered<IConfig>();
             container.Should().HaveRegistered<Config>();
             container.Should().HaveRegistered<IFirstJob>();
             container.Should().HaveRegistered<FirstJob>();
             container.Should().HaveRegistered<EnvironmentValues>();
+            container.Should().HaveRegistered<ParentConfig>();
+            container.Should().HaveRegistered<ChildConfig>();
+            container.Should().HaveRegistered<IChildConfig>();
             container.Should().NotHaveRegistered<IStorage>();
             container.Should().NotHaveRegistered<Storage>();
         }
@@ -198,22 +218,31 @@
             Environment.SetEnvironmentVariable("Custom.GuidData", "this is not a guid");
             Environment.SetEnvironmentVariable("Custom.IntData", "definitely not an int");
 
-            var sut = new ConfigurationModule(resolver);
+            try
+            {
+                var sut = new ConfigurationModule(resolver);
 
-            builder.RegisterModule(sut);
+                builder.RegisterModule(sut);
 
-            var container = builder.Build();
+                var container = builder.Build();
 
-            // There are several registrations which aren't expected because of Uri properties being resolved
-            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 1);
-            container.Should().HaveRegistered<EnvironmentValues>();
+                // There are several registrations which aren't expected because of Uri properties being resolved
+                container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 1);
+                container.Should().HaveRegistered<EnvironmentValues>();
 
-            var actual = container.Resolve<EnvironmentValues>();
+                var actual = container.Resolve<EnvironmentValues>();
 
-            actual.BoolData.Should().Be(expectedBool);
-            actual.GuidData.Should().Be(expectedGuid);
-            actual.IntData.Should().Be(expectedInt);
-            actual.StringData.Should().Be(expectedString);
+                actual.BoolData.Should().Be(expectedBool);
+                actual.GuidData.Should().Be(expectedGuid);
+                actual.IntData.Should().Be(expectedInt);
+                actual.StringData.Should().Be(expectedString);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("Custom.BoolData", null);
+                Environment.SetEnvironmentVariable("Custom.GuidData", null);
+                Environment.SetEnvironmentVariable("Custom.IntData", null);
+            }
         }
 
         [Fact]
@@ -313,22 +342,32 @@
             Environment.SetEnvironmentVariable("Custom.IntData", expectedInt.ToString());
             Environment.SetEnvironmentVariable("Custom.StringData", expectedString);
 
-            var sut = new ConfigurationModule(resolver);
+            try
+            {
+                var sut = new ConfigurationModule(resolver);
 
-            builder.RegisterModule(sut);
+                builder.RegisterModule(sut);
 
-            var container = builder.Build();
+                var container = builder.Build();
 
-            // There are several registrations which aren't expected because of Uri properties being resolved
-            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 1);
-            container.Should().HaveRegistered<EnvironmentValues>();
+                // There are several registrations which aren't expected because of Uri properties being resolved
+                container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 1);
+                container.Should().HaveRegistered<EnvironmentValues>();
 
-            var actual = container.Resolve<EnvironmentValues>();
+                var actual = container.Resolve<EnvironmentValues>();
 
-            actual.BoolData.Should().Be(expectedBool);
-            actual.GuidData.Should().Be(expectedGuid);
-            actual.IntData.Should().Be(expectedInt);
-            actual.StringData.Should().Be(expectedString);
+                actual.BoolData.Should().Be(expectedBool);
+                actual.GuidData.Should().Be(expectedGuid);
+                actual.IntData.Should().Be(expectedInt);
+                actual.StringData.Should().Be(expectedString);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("Custom.BoolData", null);
+                Environment.SetEnvironmentVariable("Custom.GuidData", null);
+                Environment.SetEnvironmentVariable("Custom.IntData", null);
+                Environment.SetEnvironmentVariable("Custom.StringData", null);
+            }
         }
 
         [Fact]
@@ -363,14 +402,18 @@
 
             var container = builder.Build();
 
-            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 7);
+            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 10);
 
             container.Should().HaveRegistered<IConfig>();
             container.Should().HaveRegistered<Config>();
-            container.Should().HaveRegistered<IStorage>();
-            container.Should().HaveRegistered<Storage>();
             container.Should().HaveRegistered<IFirstJob>();
             container.Should().HaveRegistered<FirstJob>();
+            container.Should().HaveRegistered<EnvironmentValues>();
+            container.Should().HaveRegistered<ParentConfig>();
+            container.Should().HaveRegistered<ChildConfig>();
+            container.Should().HaveRegistered<IChildConfig>();
+            container.Should().HaveRegistered<IStorage>();
+            container.Should().HaveRegistered<Storage>();
 
             var config = container.Resolve<IConfig>();
 
@@ -460,7 +503,7 @@
         {
             public TimeSpan Timeout => TimeSpan.FromSeconds(int.Parse(TimeoutInSeconds));
 
-            public string TimeoutInSeconds { get; set; } = "5";
+            public string TimeoutInSeconds { get; } = "5";
         }
 
         private class InstanceResolver : IConfigurationResolver
@@ -525,7 +568,7 @@
             [EnvironmentOverride(nameof(ReadOnlyProperty) + "." + nameof(Timeout))]
             public TimeSpan Timeout => TimeSpan.FromSeconds(TimeoutInSeconds);
 
-            public int TimeoutInSeconds { get; set; } = 5;
+            public int TimeoutInSeconds { get; } = 5;
         }
 
         private class WriteOnlyProperty

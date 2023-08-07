@@ -52,24 +52,34 @@
             Environment.SetEnvironmentVariable("Custom.IntData", expectedInt.ToString());
             Environment.SetEnvironmentVariable("Custom.StringData", expectedString);
 
-            var configurationBuilder = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json", false, true);
+            try
+            {
+                var configurationBuilder = new ConfigurationBuilder()
+                    .AddJsonFile("appsettings.json", false, true);
 
-            var config = configurationBuilder.Build();
+                var config = configurationBuilder.Build();
 
-            var builder = new ContainerBuilder();
+                var builder = new ContainerBuilder();
 
-            builder.RegisterInstance(config).As<IConfiguration>();
-            builder.RegisterModule<HostConfigurationModule<Config>>();
+                builder.RegisterInstance(config).As<IConfiguration>();
+                builder.RegisterModule<HostConfigurationModule<Config>>();
 
-            using var container = builder.Build();
+                using var container = builder.Build();
 
-            var actual = container.Resolve<EnvironmentValues>();
+                var actual = container.Resolve<EnvironmentValues>();
 
-            actual.BoolData.Should().Be(expectedBool);
-            actual.GuidData.Should().Be(expectedGuid);
-            actual.IntData.Should().Be(expectedInt);
-            actual.StringData.Should().Be(expectedString);
+                actual.BoolData.Should().Be(expectedBool);
+                actual.GuidData.Should().Be(expectedGuid);
+                actual.IntData.Should().Be(expectedInt);
+                actual.StringData.Should().Be(expectedString);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("Custom.BoolData", null);
+                Environment.SetEnvironmentVariable("Custom.GuidData", null);
+                Environment.SetEnvironmentVariable("Custom.IntData", null);
+                Environment.SetEnvironmentVariable("Custom.StringData", null);
+            }
         }
     }
 }

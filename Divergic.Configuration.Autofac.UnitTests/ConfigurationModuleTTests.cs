@@ -19,14 +19,18 @@ namespace Divergic.Configuration.Autofac.UnitTests
 
             var container = builder.Build();
 
-            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 7);
+            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 10);
 
             container.Should().HaveRegistered<IConfig>();
             container.Should().HaveRegistered<Config>();
-            container.Should().HaveRegistered<IStorage>();
-            container.Should().HaveRegistered<Storage>();
             container.Should().HaveRegistered<IFirstJob>();
             container.Should().HaveRegistered<FirstJob>();
+            container.Should().HaveRegistered<EnvironmentValues>();
+            container.Should().HaveRegistered<ParentConfig>();
+            container.Should().HaveRegistered<ChildConfig>();
+            container.Should().HaveRegistered<IChildConfig>();
+            container.Should().HaveRegistered<IStorage>();
+            container.Should().HaveRegistered<Storage>();
 
             var config = container.Resolve<IConfig>();
 
