@@ -18,6 +18,24 @@
         Storage Storage { get; }
     }
 
+    public interface IProtected
+    {
+        public string ReadOnly { get; }
+
+        public string ReadWrite { get; }
+
+        public string WriteOnly { set; }
+    }
+
+    public class Protected : IProtected
+    {
+        public string ReadOnly { get; }
+
+        public string ReadWrite { get; set; }
+
+        public string WriteOnly { set; private get; }
+    }
+
     public class ParentConfig
     {
         public ChildConfig Child { get; set; }
@@ -67,11 +85,13 @@
     {
         public EnvironmentValues Environment { get; set; } = new();
 
-        public FirstJob FirstJob { get; set; }
+        public FirstJob FirstJob { get; set; } = new();
 
-        public ParentConfig Parent { get; set; }
+        public ParentConfig Parent { get; set; } = new();
 
-        public Storage Storage { get; set; }
+        public Protected Protected { get; set; } = new();
+
+        public Storage Storage { get; set; } = new();
     }
 
     public interface IFirstJob
