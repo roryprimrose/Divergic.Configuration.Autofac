@@ -11,9 +11,8 @@ namespace Divergic.Configuration.Autofac.UnitTests
     public class ContainerAssertions :
         ReferenceTypeAssertions<IContainer, ContainerAssertions>
     {
-        public ContainerAssertions(IContainer container)
+        public ContainerAssertions(IContainer container) : base(container)
         {
-            Subject = container;
         }
 
         public AndConstraint<ContainerAssertions> HaveRegistered<T>(
