@@ -13,7 +13,34 @@
 
         FirstJob FirstJob { get; }
 
+        ParentConfig Parent { get; }
+
         Storage Storage { get; }
+    }
+
+    public class ParentConfig
+    {
+        public ChildConfig Child { get; set; }
+
+        public string Value { get; set; }
+    }
+
+    public interface IChildConfig
+    {
+        string First { get; }
+
+        Guid Second { get; }
+
+        bool Third { get; }
+    }
+
+    public class ChildConfig : IChildConfig
+    {
+        public string First { get; set; }
+
+        public Guid Second { get; set; }
+
+        public bool Third { get; set; }
     }
 
     public class EnvironmentValues
@@ -38,9 +65,11 @@
 
     public class Config : IConfig
     {
-        public EnvironmentValues Environment { get; set; }
+        public EnvironmentValues Environment { get; set; } = new();
 
         public FirstJob FirstJob { get; set; }
+
+        public ParentConfig Parent { get; set; }
 
         public Storage Storage { get; set; }
     }

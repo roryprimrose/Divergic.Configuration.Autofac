@@ -16,6 +16,7 @@
         /// Initializes a new instance of the <see cref="EnvironmentJsonResolver{T}"/>.
         /// </summary>
         /// <param name="environmentFilename">The filename of the environment specific json configuration to load.</param>
+        /// <exception cref="ArgumentException">The <paramref name="environmentFilename"/> parameter is <c>null</c>.</exception>
         public EnvironmentJsonResolver(string environmentFilename)
         {
             if (string.IsNullOrWhiteSpace(environmentFilename))
@@ -31,6 +32,7 @@
         /// </summary>
         /// <param name="filename">The filename of the json configuration to load.</param>
         /// <param name="environmentFilename">The filename of the environment specific json configuration to load.</param>
+        /// <exception cref="ArgumentException">The <paramref name="environmentFilename"/> parameter is <c>null</c>.</exception>
         public EnvironmentJsonResolver(string filename, string environmentFilename)
             : base(filename)
         {

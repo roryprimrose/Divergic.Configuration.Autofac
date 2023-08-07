@@ -18,6 +18,11 @@
             actual.Storage.BlobStorage.Should().NotBeNullOrEmpty();
             actual.Storage.Database.Should().NotBeNullOrEmpty();
             actual.Storage.TableStorage.Should().NotBeNullOrEmpty();
+            actual.Parent.Should().NotBeNull();
+            actual.Parent.Value.Should().NotBeNullOrEmpty();
+            actual.Parent.Child.First.Should().NotBeNullOrEmpty();
+            actual.Parent.Child.Second.Should().NotBeEmpty();
+            actual.Parent.Child.Third.Should().BeTrue();
             actual.FirstJob.Name.Should().NotBeNullOrEmpty();
             actual.FirstJob.TriggerInSeconds.Should().NotBe(0);
             actual.FirstJob.Trigger.Should().NotBe(TimeSpan.Zero);
