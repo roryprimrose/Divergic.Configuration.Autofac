@@ -10,8 +10,6 @@
     /// <typeparam name="T">The type of class to create from the configuration file.</typeparam>
     public class EnvironmentJsonResolver<T> : JsonResolver<T>
     {
-        private readonly string _environmentFilename;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="EnvironmentJsonResolver{T}"/>.
         /// </summary>
@@ -24,7 +22,7 @@
                 throw new ArgumentException(nameof(environmentFilename));
             }
 
-            _environmentFilename = environmentFilename;
+            EnvironmentJsonFilename = environmentFilename;
         }
 
         /// <summary>
@@ -41,7 +39,7 @@
                 throw new ArgumentException(nameof(environmentFilename));
             }
 
-            _environmentFilename = environmentFilename;
+            EnvironmentJsonFilename = environmentFilename;
         }
 
         /// <inheritdoc />
@@ -49,7 +47,12 @@
         {
             base.ConfigureBuilder(builder);
 
-            builder.AddJsonFile(_environmentFilename, true, true);
+            builder.AddJsonFile(EnvironmentJsonFilename, true, true);
         }
+
+        /// <summary>
+        /// Gets the filename to load configuration values from.
+        /// </summary>
+        public virtual string EnvironmentJsonFilename { get; }
     }
 }

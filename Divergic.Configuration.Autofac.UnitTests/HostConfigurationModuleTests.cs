@@ -32,6 +32,8 @@
         [InlineData(typeof(IChildConfig))]
         [InlineData(typeof(Storage))]
         [InlineData(typeof(IStorage))]
+        [InlineData(typeof(Protected))]
+        [InlineData(typeof(IProtected))]
         public void CanLoadConfigurationTypesFromHostConfiguration(Type expected)
         {
             var configurationBuilder = new ConfigurationBuilder()

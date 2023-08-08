@@ -232,7 +232,7 @@
         public void IgnoresEnvironmentOverrideWhenAttributeDefinedButNoEnvironmentVariableFound()
         {
             var builder = new ContainerBuilder();
-            var config = Model.Create<EnvironmentValues>();
+            var config = Model.UsingDefaultConfiguration().UsingModule<BuilderModule>().Create<EnvironmentValues>();
             var resolver = new InstanceResolver(config);
             var expectedBool = config.BoolData;
             var expectedGuid = config.GuidData;
@@ -506,7 +506,7 @@
         {
             public object Resolve()
             {
-                return Model.Create(ConfigType);
+                return Model.UsingDefaultConfiguration().UsingModule<BuilderModule>().Create(ConfigType);
             }
 
             private static Type ConfigType => typeof(T);
@@ -516,7 +516,7 @@
         {
             public object Resolve()
             {
-                var model = Model.Create<Config>().Set(x => x.Storage = null);
+                var model = Model.UsingDefaultConfiguration().UsingModule<BuilderModule>().Create<Config>().Set(x => x.Storage = null);
 
                 return model;
             }

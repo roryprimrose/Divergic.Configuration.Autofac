@@ -8,6 +8,30 @@
     public class EnvironmentJsonResolverTests
     {
         [Fact]
+        public void CanCreateWithFilename()
+        {
+            var filename = "appsettings.json";
+            var environmentFilename = "localsettings.json";
+
+            var sut = new EnvironmentJsonResolver<Config>(environmentFilename);
+
+            sut.JsonFilename.Should().Be(filename);
+            sut.EnvironmentJsonFilename.Should().Be(environmentFilename);
+        }
+
+        [Fact]
+        public void CanCreateWithFilenameAndEnvironmentOverride()
+        {
+            var filename = "appsettings.json";
+            var environmentFilename = "localsettings.json";
+
+            var sut = new EnvironmentJsonResolver<Config>(filename, environmentFilename);
+
+            sut.JsonFilename.Should().Be(filename);
+            sut.EnvironmentJsonFilename.Should().Be(environmentFilename);
+        }
+
+        [Fact]
         public void ResolvesConfigurationWhenEnvironmentFilenameNotFoundTest()
         {
             var sut = new EnvironmentJsonResolver<Config>("localsettings.json");
@@ -22,7 +46,8 @@
         [InlineData(null)]
         [InlineData("")]
         [InlineData("   ")]
-        [SuppressMessage("Usage", "CA1806:Do not ignore method results", Justification = "The constructor is what is being tested")]
+        [SuppressMessage("Usage", "CA1806:Do not ignore method results",
+            Justification = "The constructor is what is being tested")]
         public void ThrowsExceptionWhenCreatedWithInvalidEnvironmentFilenameTest(string environmentFilename)
         {
             Action action = () => new EnvironmentJsonResolver<Config>(environmentFilename);
@@ -37,7 +62,8 @@
         [InlineData(null, "appsettings.development.json")]
         [InlineData("", "appsettings.development.json")]
         [InlineData("   ", "appsettings.development.json")]
-        [SuppressMessage("Usage", "CA1806:Do not ignore method results", Justification = "The constructor is what is being tested")]
+        [SuppressMessage("Usage", "CA1806:Do not ignore method results",
+            Justification = "The constructor is what is being tested")]
         public void ThrowsExceptionWhenCreatedWithInvalidParametersTest(string filename, string environmentFilename)
         {
             Action action = () => new EnvironmentJsonResolver<Config>(filename, environmentFilename);

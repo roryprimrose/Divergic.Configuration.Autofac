@@ -18,22 +18,39 @@
         Storage Storage { get; }
     }
 
+    public class ProtectedItem
+    {
+        public string Value { get; set; }
+    }
+
     public interface IProtected
     {
-        public string ReadOnly { get; }
+        public ProtectedItem ReadOnly { get; }
 
-        public string ReadWrite { get; }
+        public ProtectedItem ReadWrite { get; }
 
-        public string WriteOnly { set; }
+        public ProtectedItem WriteOnly { set; }
+        public ProtectedItem PrivateWriteOnly { set; }
+
+        ProtectedItem this[int index] { get; }
     }
 
     public class Protected : IProtected
     {
-        public string ReadOnly { get; }
+        public ProtectedItem ReadOnly { get; }
 
-        public string ReadWrite { get; set; }
+        public ProtectedItem ReadWrite { get; set; } = new();
 
-        public string WriteOnly { set; private get; }
+        public ProtectedItem WriteOnly { set; private get; }
+
+        public ProtectedItem PrivateWriteOnly
+        {
+            set
+            {
+            }
+        }
+
+        public ProtectedItem this[int index] => new();
     }
 
     public class ParentConfig

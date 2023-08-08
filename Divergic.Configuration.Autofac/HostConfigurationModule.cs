@@ -152,7 +152,8 @@
 
             foreach (var property in properties)
             {
-                if (property.CanRead == false)
+                // A property with a private get has CanRead return true
+                if (property.CanRead == false || property.GetMethod?.IsPublic == false)
                 {
                     // Ignore any property that we can't read
                     continue;

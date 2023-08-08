@@ -51,7 +51,7 @@ namespace Divergic.Configuration.Autofac.UnitTests
         {
             public object Resolve()
             {
-                return Model.Create(ConfigType);
+                return Model.UsingDefaultConfiguration().UsingModule<BuilderModule>().Create(ConfigType);
             }
 
             private static Type ConfigType => typeof(T);
