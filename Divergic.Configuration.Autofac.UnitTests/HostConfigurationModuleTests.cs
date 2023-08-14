@@ -88,30 +88,6 @@
         }
 
         [Fact]
-        public void LoadIgnoresStringConfigTypes()
-        {
-            var builder = new ContainerBuilder();
-
-            builder.RegisterModule<HostConfigurationModule<string>>();
-
-            using var container = builder.Build();
-
-            container.IsRegistered<string>().Should().BeFalse();
-        }
-
-        [Fact]
-        public void LoadIgnoresValueTypesOnModuleDefinition()
-        {
-            var builder = new ContainerBuilder();
-
-            builder.RegisterModule<HostConfigurationModule<bool>>();
-
-            using var container = builder.Build();
-
-            container.IsRegistered<bool>().Should().BeFalse();
-        }
-
-        [Fact]
         public void LoadRegistersConfigTypesOnModuleDefinition()
         {
             var configurationBuilder = new ConfigurationBuilder()
@@ -125,7 +101,7 @@
             builder.RegisterModule<HostConfigurationModule<Config>>();
 
             using var container = builder.Build();
-            
+
             container.Should().HaveRegistered<IConfig>();
             container.Should().HaveRegistered<Config>();
             container.Should().HaveRegistered<IFirstJob>();
@@ -138,6 +114,46 @@
             container.Should().HaveRegistered<Storage>();
             container.Should().HaveRegistered<IProtected>();
             container.Should().HaveRegistered<Protected>();
+        }
+
+        [Fact]
+        public void LoadThrowsExceptionWhenConfigTypeIsString()
+        {
+            var configurationBuilder = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", false, true);
+
+            var config = configurationBuilder.Build();
+
+            var builder = new ContainerBuilder();
+
+            builder.RegisterInstance(config).As<IConfiguration>();
+            builder.RegisterModule<HostConfigurationModule<string>>();
+
+            var action = () => builder.Build();
+
+            var actual = action.Should().Throw<InvalidOperationException>().Which;
+
+            _output.WriteLine(actual.Message);
+        }
+
+        [Fact]
+        public void LoadThrowsExceptionWhenConfigTypeIsValueType()
+        {
+            var configurationBuilder = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", false, true);
+
+            var config = configurationBuilder.Build();
+
+            var builder = new ContainerBuilder();
+
+            builder.RegisterInstance(config).As<IConfiguration>();
+            builder.RegisterModule<HostConfigurationModule<Guid>>();
+
+            var action = () => builder.Build();
+
+            var actual = action.Should().Throw<InvalidOperationException>().Which;
+
+            _output.WriteLine(actual.Message);
         }
 
         [Fact]

@@ -42,14 +42,10 @@
         {
             var configType = typeof(T);
 
-            if (configType.IsValueType)
+            if (IsSupportedType(configType) == false)
             {
-                return;
-            }
-
-            if (configType == typeof(string))
-            {
-                return;
+                throw new InvalidOperationException(
+                    $"Unable to automatically load and bind application configuration to {configType}. {typeof(HostConfigurationModule<>)} only supports class types.");
             }
 
             builder.Register(c =>
