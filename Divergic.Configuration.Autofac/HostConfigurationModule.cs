@@ -1,55 +1,87 @@
 ﻿namespace Divergic.Configuration.Autofac
 {
     using System;
-    using System.Collections.Generic;
     using System.ComponentModel;
     using System.Linq;
     using System.Reflection;
     using global::Autofac;
+    using Microsoft.Extensions.Configuration;
     using Module = global::Autofac.Module;
 
     /// <summary>
-    /// The <see cref="ConfigurationModule"/>
-    /// class is used to register nested configuration types.
+    /// The <see cref="HostConfigurationModule{T}"/>
+    /// class is used to register configuration types based on configuration already configured in the host application via <see cref="IConfiguration"/>.
     /// </summary>
-    public class ConfigurationModule : Module
+    /// <typeparam name="T">The type of configuration to register in the container.</typeparam>
+    public class HostConfigurationModule<T> : Module
     {
-        private readonly IConfigurationResolver _resolver;
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="ConfigurationModule"/>.
+        /// Gets whether the specified type should be resolved and registered in the Autofac container.
         /// </summary>
-        /// <param name="resolver">The configuration resolver.</param>
-        public ConfigurationModule(IConfigurationResolver resolver)
+        /// <param name="configType">The type to evaluate.</param>
+        /// <returns><c>true</c> if the type should be registered in Autofac; otherwise <c>false</c>.</returns>
+        protected virtual bool IsSupportedType(Type configType)
         {
-            _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
+            if (configType.IsValueType)
+            {
+                // Skip value types
+                return false;
+            }
+
+            if (configType == typeof(string))
+            {
+                // Skip strings
+                return false;
+            }
+
+            return true;
         }
 
         /// <inheritdoc />
         protected override void Load(ContainerBuilder builder)
         {
-            var configuration = _resolver.Resolve();
+            var configType = typeof(T);
 
+            if (IsSupportedType(configType) == false)
+            {
+                throw new InvalidOperationException(
+                    $"Unable to automatically load and bind application configuration to {configType}. {typeof(HostConfigurationModule<>)} only supports class types.");
+            }
+
+            builder.Register(c =>
+            {
+                var config = c.Resolve<IConfiguration>();
+
+                var value = (T)config.Get(configType);
+
+                AssignEnvironmentOverride(value);
+
+                return value;
+            }).AsSelf().AsImplementedInterfaces();
+
+            RegisterConfigTypes(builder, configType);
+        }
+
+        private static void AssignEnvironmentOverride(object configuration)
+        {
             if (configuration == null)
             {
                 return;
             }
 
-            var configType = configuration.GetType();
+            var properties = configuration.GetType().GetProperties();
 
-            if (configType.IsValueType)
+            for (var index = 0; index < properties.Length; index++)
             {
-                return;
+                var property = properties[index];
+
+                if (property.CanWrite == false)
+                {
+                    continue;
+                }
+
+                AssignEnvironmentOverride(configuration, property);
             }
-
-            if (configType == typeof(string))
-            {
-                return;
-            }
-
-            var referenceTracker = new List<object>();
-
-            RegisterConfigTypes(builder, configuration, referenceTracker);
         }
 
         private static void AssignEnvironmentOverride(object configuration, PropertyInfo property)
@@ -102,50 +134,17 @@
             }
         }
 
-        private static void RegisterConfigTypes(
+        private void RegisterConfigTypes(
             ContainerBuilder builder,
-            object configuration,
-            ICollection<object> referenceTracker)
+            Type parentType)
         {
-            if (configuration == null)
-            {
-                return;
-            }
-
-            if (referenceTracker.Any(x => ReferenceEquals(configuration, x)))
-            {
-                // We found a circular reference
-                return;
-            }
-
-            var configType = configuration.GetType();
-
-            if (configType.IsValueType)
-            {
-                // Skip value types
-                return;
-            }
-
-            if (configType == typeof(string))
-            {
-                // Skip strings
-                return;
-            }
-
-            if (configType.GetInterfaces().Any())
-            {
-                builder.RegisterInstance(configuration).AsImplementedInterfaces();
-            }
-
-            builder.RegisterInstance(configuration).AsSelf();
-
-            referenceTracker.Add(configuration);
+            var configType = parentType;
 
             // Register all the properties of the configuration as their interfaces This must be done
             // after registering assembly types and modules because type scanning may have already
             // registered the configuration classes as their interfaces which means Autofac will
             // return the default classes rather than these configuration instances that have values populated.
-            var properties = configuration.GetType().GetProperties();
+            var properties = configType.GetProperties();
 
             foreach (var property in properties)
             {
@@ -153,6 +152,14 @@
                 if (property.CanRead == false || property.GetMethod?.IsPublic == false)
                 {
                     // Ignore any property that we can't read
+                    continue;
+                }
+
+                var isSupportedType = IsSupportedType(property.PropertyType);
+
+                if (isSupportedType == false)
+                {
+                    // We don't support registrations of this type
                     continue;
                 }
 
@@ -165,11 +172,20 @@
                     continue;
                 }
 
-                object value;
-
                 try
                 {
-                    value = property.GetValue(configuration);
+                    var interfaces = property.PropertyType.GetInterfaces();
+
+                    builder.Register(c =>
+                    {
+                        var config = c.Resolve(configType);
+
+                        var value = property.GetValue(config);
+
+                        AssignEnvironmentOverride(value);
+
+                        return value;
+                    }).As(property.PropertyType).As(interfaces);
                 }
                 catch (Exception)
                 {
@@ -178,21 +194,8 @@
                     continue;
                 }
 
-                if (property.CanWrite)
-                {
-                    // Attempt to assign the property value to an environment variable identified by the attribute
-                    AssignEnvironmentOverride(configuration, property);
-
-                    if (value is string stringValue)
-                    {
-                        // The value of the property may point to an environment variable
-                        // Attempt to assign the property value to the environment variable
-                        AssignEnvironmentVariable(configuration, property, stringValue);
-                    }
-                }
-
                 // Recurse into the child properties
-                RegisterConfigTypes(builder, value, referenceTracker);
+                RegisterConfigTypes(builder, property.PropertyType);
             }
         }
     }

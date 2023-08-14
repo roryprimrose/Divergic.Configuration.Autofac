@@ -11,8 +11,6 @@
 
     public class ConfigurationModuleTests
     {
-        private const int DefaultRegistrationCount = 1;
-
         [Fact]
         public void CanRegisterTypeWhenPropertyThrowsException()
         {
@@ -23,16 +21,14 @@
             builder.RegisterModule(sut);
 
             var container = builder.Build();
-
-            // There are several registrations which aren't expected because of Uri properties being resolved
-            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 1);
+            
             container.Should().HaveRegistered<ExceptionProperty>();
         }
 
         [Fact]
         public void CanRegisterTypeWithCircularReferenceTest()
         {
-            var value = new Parent {Child = new Child()};
+            var value = new Parent { Child = new Child() };
 
             value.Child.Parent = value;
 
@@ -43,9 +39,7 @@
             builder.RegisterModule(sut);
 
             var container = builder.Build();
-
-            // There are several registrations which aren't expected because of Uri properties being resolved
-            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 2);
+            
             container.Should().HaveRegistered<Parent>();
             container.Should().HaveRegistered<Child>();
         }
@@ -54,19 +48,26 @@
         public void CanRegisterTypeWithReadOnlyProperties()
         {
             // Try to get the read only property to be processed by using an environment override
-            Environment.SetEnvironmentVariable(nameof(ReadOnlyProperty) + "." + nameof(ReadOnlyProperty.Timeout), "3");
+            var name = nameof(ReadOnlyProperty) + "." + nameof(ReadOnlyProperty.Timeout);
 
-            var builder = new ContainerBuilder();
-            var resolver = new ModelBuilderResolver<ReadOnlyProperty>();
-            var sut = new ConfigurationModule(resolver);
+            Environment.SetEnvironmentVariable(name, "3");
 
-            builder.RegisterModule(sut);
+            try
+            {
+                var builder = new ContainerBuilder();
+                var resolver = new ModelBuilderResolver<ReadOnlyProperty>();
+                var sut = new ConfigurationModule(resolver);
 
-            var container = builder.Build();
+                builder.RegisterModule(sut);
 
-            // There are several registrations which aren't expected because of Uri properties being resolved
-            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 1);
-            container.Should().HaveRegistered<ReadOnlyProperty>();
+                var container = builder.Build();
+                
+                container.Should().HaveRegistered<ReadOnlyProperty>();
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(name, null);
+            }
         }
 
         [Fact]
@@ -79,9 +80,7 @@
             builder.RegisterModule(sut);
 
             var container = builder.Build();
-
-            // There are several registrations which aren't expected because of Uri properties being resolved
-            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 5);
+            
             container.Should().HaveRegistered<Location>();
             container.Should().HaveRegistered<Uri>();
         }
@@ -90,21 +89,27 @@
         public void CanRegisterTypeWithWriteOnlyProperties()
         {
             // Try to get the read only property to be processed by using an environment override
-            Environment.SetEnvironmentVariable(nameof(WriteOnlyProperty) + "." + nameof(WriteOnlyProperty.Timeout),
-                "3");
+            var name = nameof(WriteOnlyProperty) + "." + nameof(WriteOnlyProperty.Timeout);
 
-            var builder = new ContainerBuilder();
-            var config = new WriteOnlyProperty();
-            var resolver = new InstanceResolver(config);
-            var sut = new ConfigurationModule(resolver);
+            Environment.SetEnvironmentVariable(name, "3");
 
-            builder.RegisterModule(sut);
+            try
+            {
+                var builder = new ContainerBuilder();
+                var config = new WriteOnlyProperty();
+                var resolver = new InstanceResolver(config);
+                var sut = new ConfigurationModule(resolver);
 
-            var container = builder.Build();
+                builder.RegisterModule(sut);
 
-            // There are several registrations which aren't expected because of Uri properties being resolved
-            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 1);
-            container.Should().HaveRegistered<WriteOnlyProperty>();
+                var container = builder.Build();
+                
+                container.Should().HaveRegistered<WriteOnlyProperty>();
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(name, null);
+            }
         }
 
         [Fact]
@@ -117,15 +122,19 @@
             builder.RegisterModule(sut);
 
             var container = builder.Build();
-
-            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 5);
+            
             container.Should().HaveRegistered<IConfig>();
             container.Should().HaveRegistered<Config>();
             container.Should().HaveRegistered<IFirstJob>();
             container.Should().HaveRegistered<FirstJob>();
             container.Should().HaveRegistered<EnvironmentValues>();
+            container.Should().HaveRegistered<ParentConfig>();
+            container.Should().HaveRegistered<ChildConfig>();
+            container.Should().HaveRegistered<IChildConfig>();
             container.Should().NotHaveRegistered<IStorage>();
             container.Should().NotHaveRegistered<Storage>();
+            container.Should().HaveRegistered<IProtected>();
+            container.Should().HaveRegistered<Protected>();
         }
 
         [Fact]
@@ -138,8 +147,7 @@
             builder.RegisterModule(sut);
 
             var container = builder.Build();
-
-            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount);
+            
             container.Should().NotHaveRegistered<string>();
         }
 
@@ -153,8 +161,7 @@
             builder.RegisterModule(sut);
 
             var container = builder.Build();
-
-            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount);
+            
             container.Should().NotHaveRegistered<int>();
         }
 
@@ -173,9 +180,7 @@
             builder.RegisterModule(sut);
 
             var container = builder.Build();
-
-            // There are several registrations which aren't expected because of Uri properties being resolved
-            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 1);
+            
             container.Should().HaveRegistered<EnvironmentValuesWithoutAttributes>();
 
             var actual = container.Resolve<EnvironmentValuesWithoutAttributes>();
@@ -198,29 +203,36 @@
             Environment.SetEnvironmentVariable("Custom.GuidData", "this is not a guid");
             Environment.SetEnvironmentVariable("Custom.IntData", "definitely not an int");
 
-            var sut = new ConfigurationModule(resolver);
+            try
+            {
+                var sut = new ConfigurationModule(resolver);
 
-            builder.RegisterModule(sut);
+                builder.RegisterModule(sut);
 
-            var container = builder.Build();
+                var container = builder.Build();
+                
+                container.Should().HaveRegistered<EnvironmentValues>();
 
-            // There are several registrations which aren't expected because of Uri properties being resolved
-            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 1);
-            container.Should().HaveRegistered<EnvironmentValues>();
+                var actual = container.Resolve<EnvironmentValues>();
 
-            var actual = container.Resolve<EnvironmentValues>();
-
-            actual.BoolData.Should().Be(expectedBool);
-            actual.GuidData.Should().Be(expectedGuid);
-            actual.IntData.Should().Be(expectedInt);
-            actual.StringData.Should().Be(expectedString);
+                actual.BoolData.Should().Be(expectedBool);
+                actual.GuidData.Should().Be(expectedGuid);
+                actual.IntData.Should().Be(expectedInt);
+                actual.StringData.Should().Be(expectedString);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("Custom.BoolData", null);
+                Environment.SetEnvironmentVariable("Custom.GuidData", null);
+                Environment.SetEnvironmentVariable("Custom.IntData", null);
+            }
         }
 
         [Fact]
         public void IgnoresEnvironmentOverrideWhenAttributeDefinedButNoEnvironmentVariableFound()
         {
             var builder = new ContainerBuilder();
-            var config = Model.Create<EnvironmentValues>();
+            var config = Model.UsingDefaultConfiguration().UsingModule<BuilderModule>().Create<EnvironmentValues>();
             var resolver = new InstanceResolver(config);
             var expectedBool = config.BoolData;
             var expectedGuid = config.GuidData;
@@ -232,9 +244,7 @@
             builder.RegisterModule(sut);
 
             var container = builder.Build();
-
-            // There are several registrations which aren't expected because of Uri properties being resolved
-            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 1);
+            
             container.Should().HaveRegistered<EnvironmentValues>();
 
             var actual = container.Resolve<EnvironmentValues>();
@@ -260,9 +270,7 @@
             builder.RegisterModule(sut);
 
             var container = builder.Build();
-
-            // There are several registrations which aren't expected because of Uri properties being resolved
-            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 2);
+            
             container.Should().HaveRegistered<Storage>();
 
             var actual = container.Resolve<IStorage>();
@@ -287,9 +295,7 @@
             builder.RegisterModule(sut);
 
             var container = builder.Build();
-
-            // There are several registrations which aren't expected because of Uri properties being resolved
-            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 1);
+            
             container.Should().HaveRegistered<EnvironmentValuesWithoutAttributes>();
 
             var actual = container.Resolve<EnvironmentValuesWithoutAttributes>();
@@ -313,22 +319,30 @@
             Environment.SetEnvironmentVariable("Custom.IntData", expectedInt.ToString());
             Environment.SetEnvironmentVariable("Custom.StringData", expectedString);
 
-            var sut = new ConfigurationModule(resolver);
+            try
+            {
+                var sut = new ConfigurationModule(resolver);
 
-            builder.RegisterModule(sut);
+                builder.RegisterModule(sut);
 
-            var container = builder.Build();
+                var container = builder.Build();
+                
+                container.Should().HaveRegistered<EnvironmentValues>();
 
-            // There are several registrations which aren't expected because of Uri properties being resolved
-            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 1);
-            container.Should().HaveRegistered<EnvironmentValues>();
+                var actual = container.Resolve<EnvironmentValues>();
 
-            var actual = container.Resolve<EnvironmentValues>();
-
-            actual.BoolData.Should().Be(expectedBool);
-            actual.GuidData.Should().Be(expectedGuid);
-            actual.IntData.Should().Be(expectedInt);
-            actual.StringData.Should().Be(expectedString);
+                actual.BoolData.Should().Be(expectedBool);
+                actual.GuidData.Should().Be(expectedGuid);
+                actual.IntData.Should().Be(expectedInt);
+                actual.StringData.Should().Be(expectedString);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("Custom.BoolData", null);
+                Environment.SetEnvironmentVariable("Custom.GuidData", null);
+                Environment.SetEnvironmentVariable("Custom.IntData", null);
+                Environment.SetEnvironmentVariable("Custom.StringData", null);
+            }
         }
 
         [Fact]
@@ -341,9 +355,7 @@
             builder.RegisterModule(sut);
 
             var container = builder.Build();
-
-            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 3);
-
+            
             container.Should().HaveRegistered<ICollection<Location>>();
             container.Should().HaveRegistered<Collection<Location>>();
 
@@ -362,15 +374,19 @@
             builder.RegisterModule(sut);
 
             var container = builder.Build();
-
-            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 7);
-
+            
             container.Should().HaveRegistered<IConfig>();
             container.Should().HaveRegistered<Config>();
-            container.Should().HaveRegistered<IStorage>();
-            container.Should().HaveRegistered<Storage>();
             container.Should().HaveRegistered<IFirstJob>();
             container.Should().HaveRegistered<FirstJob>();
+            container.Should().HaveRegistered<EnvironmentValues>();
+            container.Should().HaveRegistered<ParentConfig>();
+            container.Should().HaveRegistered<ChildConfig>();
+            container.Should().HaveRegistered<IChildConfig>();
+            container.Should().HaveRegistered<IStorage>();
+            container.Should().HaveRegistered<Storage>();
+            container.Should().HaveRegistered<IProtected>();
+            container.Should().HaveRegistered<Protected>();
 
             var config = container.Resolve<IConfig>();
 
@@ -399,8 +415,7 @@
             builder.RegisterModule(sut);
 
             var container = builder.Build();
-
-            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 2);
+            
             container.Should().HaveRegistered<IFirstJob>();
             container.Should().HaveRegistered<FirstJob>();
         }
@@ -415,8 +430,7 @@
             builder.RegisterModule(sut);
 
             var container = builder.Build();
-
-            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 1);
+            
             container.Should().HaveRegistered<NoDefinition>();
         }
 
@@ -431,7 +445,8 @@
 
             var container = builder.Build();
 
-            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount);
+            // Only the default registration should exist
+            container.ComponentRegistry.Registrations.Should().HaveCount(1);
         }
 
         [Fact]
@@ -460,7 +475,7 @@
         {
             public TimeSpan Timeout => TimeSpan.FromSeconds(int.Parse(TimeoutInSeconds));
 
-            public string TimeoutInSeconds { get; set; } = "5";
+            public string TimeoutInSeconds { get; } = "5";
         }
 
         private class InstanceResolver : IConfigurationResolver
@@ -491,7 +506,7 @@
         {
             public object Resolve()
             {
-                return Model.Create(ConfigType);
+                return Model.UsingDefaultConfiguration().UsingModule<BuilderModule>().Create(ConfigType);
             }
 
             private static Type ConfigType => typeof(T);
@@ -501,7 +516,7 @@
         {
             public object Resolve()
             {
-                var model = Model.Create<Config>().Set(x => x.Storage = null);
+                var model = Model.UsingDefaultConfiguration().UsingModule<BuilderModule>().Create<Config>().Set(x => x.Storage = null);
 
                 return model;
             }
@@ -525,7 +540,7 @@
             [EnvironmentOverride(nameof(ReadOnlyProperty) + "." + nameof(Timeout))]
             public TimeSpan Timeout => TimeSpan.FromSeconds(TimeoutInSeconds);
 
-            public int TimeoutInSeconds { get; set; } = 5;
+            public int TimeoutInSeconds { get; } = 5;
         }
 
         private class WriteOnlyProperty

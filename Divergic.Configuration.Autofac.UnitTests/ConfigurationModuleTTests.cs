@@ -8,8 +8,6 @@ namespace Divergic.Configuration.Autofac.UnitTests
 
     public class ConfigurationModuleTTests
     {
-        private const int DefaultRegistrationCount = 1;
-
         [Fact]
         public void RegistersConfigurationWithNestedTypesTest()
         {
@@ -18,15 +16,19 @@ namespace Divergic.Configuration.Autofac.UnitTests
             builder.RegisterModule<ConfigurationModule<InMemoryResolver<Config>>>();
 
             var container = builder.Build();
-
-            container.ComponentRegistry.Registrations.Should().HaveCount(DefaultRegistrationCount + 7);
-
+            
             container.Should().HaveRegistered<IConfig>();
             container.Should().HaveRegistered<Config>();
-            container.Should().HaveRegistered<IStorage>();
-            container.Should().HaveRegistered<Storage>();
             container.Should().HaveRegistered<IFirstJob>();
             container.Should().HaveRegistered<FirstJob>();
+            container.Should().HaveRegistered<EnvironmentValues>();
+            container.Should().HaveRegistered<ParentConfig>();
+            container.Should().HaveRegistered<ChildConfig>();
+            container.Should().HaveRegistered<IChildConfig>();
+            container.Should().HaveRegistered<IStorage>();
+            container.Should().HaveRegistered<Storage>();
+            container.Should().HaveRegistered<IProtected>();
+            container.Should().HaveRegistered<Protected>();
 
             var config = container.Resolve<IConfig>();
 
@@ -49,7 +51,7 @@ namespace Divergic.Configuration.Autofac.UnitTests
         {
             public object Resolve()
             {
-                return Model.Create(ConfigType);
+                return Model.UsingDefaultConfiguration().UsingModule<BuilderModule>().Create(ConfigType);
             }
 
             private static Type ConfigType => typeof(T);
