@@ -1,3 +1,7 @@
+# Deprecated
+
+This package has been deprecated and is replaced by [Neovolve.Configuration.DependencyInjection](https://github.com/roryprimrose/Neovolve.Configuration.DependencyInjection). It has similar functionality but works directly against `IHostBuilder` instead of `Autofac` and also provides hot-reload support.
+
 # Introduction
 
 The Divergic.Configuration.Autofac NuGet package provides an Autofac module for registering nested application configuration types. This is helpful when wanting dependency injection of strong typed application configuration.
